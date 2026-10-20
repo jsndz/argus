@@ -2,7 +2,13 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const { spawn } = require('child_process');
-require('dotenv').config();
+try {
+    process.loadEnvFile();
+} catch (error) {
+    if (error.code !== 'ENOENT') {
+        throw error;
+    }
+}
 
 const app = express();
 
@@ -39,12 +45,13 @@ app.post('/start-stream', (req, res) => {
         '-c:v', 'libx264',
         '-preset', 'veryfast',
         '-tune', 'zerolatency',
-        '-c:a', 'aac',
+        '-c:a', 'libopus',   
+        '-ar', '48000',         
+        '-ac', '2',           
         '-rtsp_transport', 'tcp',
         '-f', 'rtsp',
         'rtsp://localhost:8554/live'
     ]);
-
     ffmpegProcess.stderr.on('data', (data) => {
         console.log(data.toString());
     });
