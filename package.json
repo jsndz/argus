@@ -7,10 +7,13 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "^5.2.1",
-    "multer": "^2.1.1"
+    "multer": "^2.1.1",
+    "multicast-dns": "^7.2.5",
+    "yaml": "^2.9.1"
   }
 }

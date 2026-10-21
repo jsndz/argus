@@ -1,163 +1,223 @@
 <!doctype html>
-
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Heimdall Stream</title>
-
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #0f172a;
-        color: white;
-        text-align: center;
-        padding: 40px;
-      }
-
-      h1 {
-        margin-bottom: 20px;
-      }
-
-      .card {
-        background: #1e293b;
-        padding: 20px;
-        border-radius: 12px;
-        width: 400px;
-        margin: auto;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      }
-
-      input {
-        margin: 10px 0;
-      }
-
-      button {
-        padding: 10px 20px;
-        margin: 10px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-
-      .start {
-        background: #22c55e;
-        color: black;
-      }
-
-      .stop {
-        background: #ef4444;
-        color: white;
-      }
-
-      .upload {
-        background: #3b82f6;
-        color: white;
-      }
-
-      #status {
-        margin-top: 15px;
-        font-size: 14px;
-        color: #94a3b8;
-      }
-
-      #link {
-        margin-top: 10px;
-        font-weight: bold;
-        color: #38bdf8;
-      }
-    </style>
+    <title>Argus Stream - Control Room</title>
+    <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <h1>Argus Stream</h1>
+    <!-- Top Bar -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">&#9658;</div>
+        <div>
+          <div class="brand-title">Argus Stream</div>
+          <div class="brand-subtitle">Zero-Config Local Video Distribution</div>
+        </div>
+      </div>
 
-    <div class="card">
-      <h3>Upload Video</h3>
+      <div class="header-badges">
+        <a id="lan-header-link" class="badge lan-link-badge" href="#" target="_blank">
+          LAN: http://argus.local:5000
+        </a>
+        <div id="stream-status-badge" class="badge badge-idle">
+          <span class="badge-dot"></span> IDLE
+        </div>
+      </div>
+    </header>
 
-      <form id="uploadForm">
-        <input type="file" name="video" accept="video/*" required />
-        <br />
-        <button class="upload" type="submit">Upload</button>
-      </form>
+    <!-- Main Container -->
+    <main class="container">
+      <div class="grid-2">
+        <!-- Left Column: Networking & MediaMTX -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- Network Discovery Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>&#127760;</span> Network Discovery & Interface
+              </h2>
+              <span id="active-hostname-display" class="badge">argus.local</span>
+            </div>
 
-      <hr />
+            <div class="form-group">
+              <label for="interface-select">Active Network Interface & IP</label>
+              <select id="interface-select">
+                <option value="">Detecting interfaces...</option>
+              </select>
+              <div class="form-help">
+                Active IP: <strong id="active-ip-display">Detecting...</strong>
+              </div>
+            </div>
 
-      <h3>Controls</h3>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="hide-virtual-check" checked />
+                <span>Filter out virtual, loopback, and Docker bridge interfaces</span>
+              </label>
+            </div>
 
-      <button class="start" id="startStream">Start Stream</button>
-      <button class="stop" id="stopStream">Stop Stream</button>
+            <button id="apply-nic-btn" class="btn btn-primary" style="width: 100%;">
+              Save &amp; Reconfigure
+            </button>
+          </div>
 
-      <p id="status">Status: Idle</p>
+          <!-- MediaMTX Status & Health Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>&#9881;</span> MediaMTX Server
+              </h2>
+              <div id="mtx-status-indicator" class="badge badge-idle">
+                <span class="badge-dot pulse"></span> Checking...
+              </div>
+            </div>
 
-      <p>Viewer Link:</p>
-      <p id="link"></p>
-    </div>
+            <p style="font-size: 13px; color: var(--text-muted);">
+              MediaMTX handles RTSP ingest and WebRTC ICE negotiation with the selected IP.
+            </p>
 
-    <script>
-      const form = document.getElementById("uploadForm");
-      const status = document.getElementById("status");
-      const link = document.getElementById("link");
+            <div id="mtx-error-alert" class="alert alert-danger">
+              <strong>Startup Warning:</strong>
+              <div id="mtx-error-message"></div>
+            </div>
 
-      const startBtn = document.getElementById("startStream");
-      const stopBtn = document.getElementById("stopStream");
+            <div class="endpoint-grid">
+              <div class="endpoint-card">
+                <div class="endpoint-title">
+                  <span>RTSP Ingest</span>
+                  <span id="mtx-rtsp-status" class="status-indicator">...</span>
+                </div>
+                <div class="endpoint-val">:8554</div>
+              </div>
 
-      const ip = window.location.hostname;
-      link.innerText = `http://${ip}:8889/live`;
+              <div class="endpoint-card">
+                <div class="endpoint-title">
+                  <span>WebRTC (WHEP)</span>
+                  <span id="mtx-webrtc-status" class="status-indicator">...</span>
+                </div>
+                <div class="endpoint-val">:8889</div>
+              </div>
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+              <div class="endpoint-card">
+                <div class="endpoint-title">
+                  <span>HLS Stream</span>
+                  <span id="mtx-hls-status" class="status-indicator">...</span>
+                </div>
+                <div class="endpoint-val">:8888</div>
+              </div>
 
-        const formData = new FormData(form);
+              <div class="endpoint-card">
+                <div class="endpoint-title">
+                  <span>Control API</span>
+                  <span id="mtx-api-status" class="status-indicator">...</span>
+                </div>
+                <div class="endpoint-val">:9997</div>
+              </div>
+            </div>
 
-        status.innerText = "Uploading...";
+            <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+              <button id="restart-mtx-btn" class="btn btn-secondary btn-sm">
+                Restart MediaMTX
+              </button>
+            </div>
+          </div>
+        </div>
 
-        try {
-          const res = await fetch("/upload", {
-            method: "POST",
-            body: formData,
-          });
+        <!-- Right Column: Media Upload & Stream Controls -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- Upload Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>&#128193;</span> Video Upload &amp; Loop Stream
+              </h2>
+            </div>
 
-          const text = await res.text();
-          status.innerText = " Uploaded successfully";
-          alert(text);
-        } catch (err) {
-          status.innerText = " Upload failed";
-          console.error(err);
-        }
-      });
+            <form id="uploadForm">
+              <div id="dropzone" class="dropzone">
+                <p style="font-size: 15px; font-weight: 500; margin-bottom: 6px;">
+                  Drag &amp; drop video file here, or click to browse
+                </p>
+                <p style="font-size: 12px; color: var(--text-muted);">
+                  Supports MP4, MKV, MOV, TS
+                </p>
+                <input type="file" id="videoFile" name="video" accept="video/*" />
+                <div id="file-details" style="display: none; margin-top: 10px; font-size: 13px; color: #60a5fa; font-weight: 600;"></div>
+              </div>
 
-      startBtn.addEventListener("click", async () => {
-        status.innerText = "Starting stream...";
+              <div style="margin-top: 16px;">
+                <button id="uploadBtn" class="btn btn-primary" type="submit" style="width: 100%;">
+                  Upload Video
+                </button>
+              </div>
+            </form>
 
-        try {
-          const res = await fetch("/start-stream", {
-            method: "POST",
-          });
+            <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 20px 0;" />
 
-          const text = await res.text();
-          status.innerText = " Streaming live";
-          alert(text);
-        } catch (err) {
-          status.innerText = " Failed to start stream";
-          console.error(err);
-        }
-      });
+            <div>
+              <h3 style="font-size: 15px; margin-bottom: 12px;">Stream Controls</h3>
+              <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <button id="startStream" class="btn btn-success" style="flex: 1;">
+                  &#9658; Start Stream
+                </button>
+                <button id="stopStream" class="btn btn-danger" style="flex: 1;">
+                  &#9632; Stop Stream
+                </button>
+              </div>
+              <p id="stream-status-text" style="font-size: 13px; color: var(--text-muted);">
+                No stream running
+              </p>
+            </div>
+          </div>
 
-      stopBtn.addEventListener("click", async () => {
-        status.innerText = "Stopping stream...";
+          <!-- Viewer & Share Links Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>&#128279;</span> Viewer &amp; Stream URLs
+              </h2>
+            </div>
 
-        try {
-          const res = await fetch("/stop");
-          const text = await res.text();
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <label>WebRTC Player (Low Latency)</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <a id="webrtc-link" href="#" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
+                    http://argus.local:8889/live
+                  </a>
+                  <button id="copy-webrtc-btn" class="btn btn-secondary btn-sm">Copy</button>
+                </div>
+              </div>
 
-          status.innerText = " Stream stopped";
-          alert(text);
-        } catch (err) {
-          status.innerText = " Failed to stop";
-          console.error(err);
-        }
-      });
-    </script>
+              <div>
+                <label>RTSP Ingest / Feed URL</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span id="rtsp-link" class="endpoint-val" style="flex: 1;">
+                    rtsp://argus.local:8554/live
+                  </span>
+                  <button id="copy-rtsp-btn" class="btn btn-secondary btn-sm">Copy</button>
+                </div>
+              </div>
+
+              <div>
+                <label>HLS Stream (Smart TVs &amp; Players)</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <a id="hls-link" href="#" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
+                    http://argus.local:8888/live
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <script src="/script.js"></script>
   </body>
 </html>

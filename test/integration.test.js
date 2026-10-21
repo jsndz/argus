@@ -1,0 +1,82 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const os = require('node:os');
+const path = require('node:path');
+process.env.ARGUS_CONFIG_PATH = path.join(os.tmpdir(), `argus-test-int-${Date.now()}.json`);
+const express = require('express');
+
+const { networkManager } = require('../lib/network');
+const { mdnsManager } = require('../lib/mdns');
+const { mediaMtxManager } = require('../lib/mediamtx');
+
+test('Integration: Express API serves network interfaces and updates configuration', async (t) => {
+  const app = express();
+  app.use(express.json());
+
+  app.get('/api/status', (req, res) => {
+    res.json({
+      network: networkManager.getNetworkInfo(),
+      mdns: mdnsManager.getStatus(),
+      mediamtx: mediaMtxManager.getStatus()
+    });
+  });
+
+  app.get('/api/network/interfaces', (req, res) => {
+    res.json(networkManager.getNetworkInfo());
+  });
+
+  app.post('/api/network/select', async (req, res) => {
+    const { address } = req.body;
+    try {
+      const updatedNetwork = networkManager.select(address);
+      const selectedIp = updatedNetwork.selected.address;
+      const mdnsStatus = await mdnsManager.update(selectedIp);
+      mediaMtxManager.generateConfig(selectedIp, mdnsStatus.hostname);
+      res.json({
+        success: true,
+        network: updatedNetwork,
+        mdns: mdnsStatus
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  const server = await new Promise((resolve) => {
+    const s = app.listen(0, '127.0.0.1', () => resolve(s));
+  });
+
+  t.after(async () => {
+    server.close();
+    await mdnsManager.stop();
+  });
+
+  const port = server.address().port;
+  const baseUrl = `http://127.0.0.1:${port}`;
+
+  // 1. Test GET /api/network/interfaces
+  const ifacesRes = await fetch(`${baseUrl}/api/network/interfaces`);
+  assert.equal(ifacesRes.status, 200);
+  const ifacesData = await ifacesRes.json();
+  assert.ok(Array.isArray(ifacesData.interfaces));
+  assert.ok(ifacesData.recommended);
+  assert.ok(ifacesData.selected);
+
+  // 2. Test GET /api/status
+  const statusRes = await fetch(`${baseUrl}/api/status`);
+  assert.equal(statusRes.status, 200);
+  const statusData = await statusRes.json();
+  assert.ok(statusData.network);
+  assert.ok(statusData.mediamtx);
+
+  // 3. Test POST /api/network/select
+  const selectRes = await fetch(`${baseUrl}/api/network/select`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address: ifacesData.selected.address })
+  });
+  assert.equal(selectRes.status, 200);
+  const selectData = await selectRes.json();
+  assert.equal(selectData.success, true);
+  assert.equal(selectData.network.selected.address, ifacesData.selected.address);
+});

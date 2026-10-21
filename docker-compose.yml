@@ -11,10 +11,7 @@ services:
       - "8889:8889"   # WebRTC
       - "8890:8890/udp" # WebRTC UDP
       - "8189:8189/udp" # WebRTC UDP
-
-    environment:
-      - MTX_RTSPTRANSPORTS=tcp
-      - MTX_WEBRTCADDITIONALHOSTS=${LOCAL_IP}
+      - "9997:9997"   # MediaMTX API
 
     volumes:
       - ./mediamtx.yml:/mediamtx.yml
