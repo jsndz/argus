@@ -24,6 +24,9 @@
         <div id="stream-status-badge" class="badge badge-idle">
           <span class="badge-dot"></span> IDLE
         </div>
+        <a href="/watch" class="btn btn-primary btn-sm" target="_blank" style="text-decoration: none;">
+          <span>&#128065;</span> View Stream
+        </a>
       </div>
     </header>
 
@@ -86,23 +89,7 @@
             <div class="endpoint-grid">
               <div class="endpoint-card">
                 <div class="endpoint-title">
-                  <span>RTSP Ingest</span>
-                  <span id="mtx-rtsp-status" class="status-indicator">...</span>
-                </div>
-                <div class="endpoint-val">:8554</div>
-              </div>
-
-              <div class="endpoint-card">
-                <div class="endpoint-title">
-                  <span>WebRTC (WHEP)</span>
-                  <span id="mtx-webrtc-status" class="status-indicator">...</span>
-                </div>
-                <div class="endpoint-val">:8889</div>
-              </div>
-
-              <div class="endpoint-card">
-                <div class="endpoint-title">
-                  <span>HLS Stream</span>
+                  <span>HLS Stream (Output)</span>
                   <span id="mtx-hls-status" class="status-indicator">...</span>
                 </div>
                 <div class="endpoint-val">:8888</div>
@@ -110,7 +97,15 @@
 
               <div class="endpoint-card">
                 <div class="endpoint-title">
-                  <span>Control API</span>
+                  <span>FFmpeg RTSP (Ingest)</span>
+                  <span id="mtx-rtsp-status" class="status-indicator">...</span>
+                </div>
+                <div class="endpoint-val">:8554</div>
+              </div>
+
+              <div class="endpoint-card">
+                <div class="endpoint-title">
+                  <span>MediaMTX API</span>
                   <span id="mtx-api-status" class="status-indicator">...</span>
                 </div>
                 <div class="endpoint-val">:9997</div>
@@ -176,37 +171,28 @@
           <div class="card">
             <div class="card-header">
               <h2 class="card-title">
-                <span>&#128279;</span> Viewer &amp; Stream URLs
+                <span>&#128279;</span> HLS Viewer &amp; Stream URLs
               </h2>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 14px;">
               <div>
-                <label>WebRTC Player (Low Latency)</label>
+                <label>HLS Player (Viewer Page)</label>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <a id="webrtc-link" href="#" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
-                    http://argus.local:8889/live
+                  <a id="hls-player-link" href="/watch" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
+                    http://argus.local:5000/watch
                   </a>
-                  <button id="copy-webrtc-btn" class="btn btn-secondary btn-sm">Copy</button>
+                  <button id="copy-hls-player-btn" class="btn btn-secondary btn-sm">Copy</button>
                 </div>
               </div>
 
               <div>
-                <label>RTSP Ingest / Feed URL</label>
+                <label>Direct HLS Stream (.m3u8 Playlist)</label>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <span id="rtsp-link" class="endpoint-val" style="flex: 1;">
-                    rtsp://argus.local:8554/live
-                  </span>
-                  <button id="copy-rtsp-btn" class="btn btn-secondary btn-sm">Copy</button>
-                </div>
-              </div>
-
-              <div>
-                <label>HLS Stream (Smart TVs &amp; Players)</label>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                  <a id="hls-link" href="#" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
-                    http://argus.local:8888/live
+                  <a id="hls-stream-link" href="/hls/index.m3u8" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
+                    http://argus.local:5000/hls/index.m3u8
                   </a>
+                  <button id="copy-hls-stream-btn" class="btn btn-secondary btn-sm">Copy</button>
                 </div>
               </div>
             </div>

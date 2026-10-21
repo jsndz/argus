@@ -5,12 +5,8 @@ services:
     restart: unless-stopped
 
     ports:
-      - "8554:8554"   # RTSP
-      - "1935:1935"   # RTMP
-      - "8888:8888"   # HLS
-      - "8889:8889"   # WebRTC
-      - "8890:8890/udp" # WebRTC UDP
-      - "8189:8189/udp" # WebRTC UDP
+      - "8554:8554"   # RTSP (Ingest)
+      - "8888:8888"   # HLS (Playback)
       - "9997:9997"   # MediaMTX API
 
     volumes:

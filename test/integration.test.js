@@ -79,4 +79,25 @@ test('Integration: Express API serves network interfaces and updates configurati
   const selectData = await selectRes.json();
   assert.equal(selectData.success, true);
   assert.equal(selectData.network.selected.address, ifacesData.selected.address);
+
+  // 4. Test GET /watch (Viewer Page)
+  app.get('/watch', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'watch.html'));
+  });
+  const watchRes = await fetch(`${baseUrl}/watch`);
+  assert.equal(watchRes.status, 200);
+  const watchHtml = await watchRes.text();
+  assert.ok(watchHtml.includes('Argus Stream'));
+  assert.ok(watchHtml.includes('liveVideo'));
+
+  // 5. Test GET /api/qr
+  const QRCode = require('qrcode');
+  app.get('/api/qr', async (req, res) => {
+    const qrDataUrl = await QRCode.toDataURL('http://localhost:5000/watch');
+    res.json({ qr: qrDataUrl });
+  });
+  const qrRes = await fetch(`${baseUrl}/api/qr`);
+  assert.equal(qrRes.status, 200);
+  const qrData = await qrRes.json();
+  assert.ok(qrData.qr.startsWith('data:image/png;base64,'));
 });

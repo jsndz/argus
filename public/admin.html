@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Argus Stream - Control Room</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <!-- Top Bar -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">&#9658;</div>
+        <div>
+          <div class="brand-title">Argus Stream</div>
+          <div class="brand-subtitle">Zero-Config Local Video Distribution</div>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <a id="lan-header-link" class="badge lan-link-badge" href="#" target="_blank">
+          LAN: http://argus.local:5000
+        </a>
+        <div id="stream-status-badge" class="badge badge-idle">
+          <span class="badge-dot"></span> IDLE
+        </div>
+        <a href="/watch" class="btn btn-primary btn-sm" target="_blank" style="text-decoration: none;">
+          <span>&#128065;</span> View Stream
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+      <!-- Firewall Alert Banner -->
+      <div id="firewall-alert-box" style="display: none; margin-bottom: 24px; padding: 16px 20px; border-radius: 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4);">
+        <strong style="color: #f87171; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+          <span>&#9888;&#65039;</span> Firewall Alert: LAN Access Blocked by Host Firewall
+        </strong>
+        <p id="firewall-alert-text" style="font-size: 13px; color: #fca5a5; margin: 8px 0 10px 0; line-height: 1.5;"></p>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <code id="firewall-remedy-code" style="background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #60a5fa;"></code>
+          <button id="copy-firewall-btn" class="btn btn-primary btn-sm" style="font-size: 12px; padding: 4px 10px;">Copy Fix Command</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Left Column: Networking & MediaMTX -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- Network Discovery Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>&#127760;</span> Network Discovery & Interface
+              </h2>
+              <span id="active-hostname-display" class="badge">argus.local</span>
+            </div>
+
+            <div class="form-group">
+              <label for="interface-select">Active Network Interface & IP</label>
+              <select id="interface-select">
+                <option value="">Detecting interfaces...</option>
+              </select>
+              <div class="form-help">
+                Active IP: <strong id="active-ip-display">Detecting...</strong>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="hide-virtual-check" checked />
+                <span>Filter out virtual, loopback, and Docker bridge interfaces</span>
+              </label>
+            </div>
+
+            <button id="apply-nic-btn" class="btn btn-primary" style="width: 100%;">
+              Save &amp; Reconfigure
+            </button>
+          </div>
+
+          <!-- MediaMTX Status & Health Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>&#9881;</span> MediaMTX Server
+              </h2>
+              <div id="mtx-status-indicator" class="badge badge-idle">
+                <span class="badge-dot pulse"></span> Checking...
+              </div>
+            </div>
+
+            <p style="font-size: 13px; color: var(--text-muted);">
+              MediaMTX handles RTSP ingest and WebRTC ICE negotiation with the selected IP.
+            </p>
+
+            <div id="mtx-error-alert" class="alert alert-danger">
+              <strong>Startup Warning:</strong>
+              <div id="mtx-error-message"></div>
+            </div>
+
+            <div class="endpoint-grid">
+              <div class="endpoint-card">
+                <div class="endpoint-title">
+                  <span>HLS Stream (Output)</span>
+                  <span id="mtx-hls-status" class="status-indicator">...</span>
+                </div>
+                <div class="endpoint-val">:8888</div>
+              </div>
+
+              <div class="endpoint-card">
+                <div class="endpoint-title">
+                  <span>FFmpeg RTSP (Ingest)</span>
+                  <span id="mtx-rtsp-status" class="status-indicator">...</span>
+                </div>
+                <div class="endpoint-val">:8554</div>
+              </div>
+
+              <div class="endpoint-card">
+                <div class="endpoint-title">
+                  <span>MediaMTX API</span>
+                  <span id="mtx-api-status" class="status-indicator">...</span>
+                </div>
+                <div class="endpoint-val">:9997</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+              <button id="restart-mtx-btn" class="btn btn-secondary btn-sm">
+                Restart MediaMTX
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Media Upload & Stream Controls -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- Upload Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>&#128193;</span> Video Upload &amp; Loop Stream
+              </h2>
+            </div>
+
+            <form id="uploadForm">
+              <div id="dropzone" class="dropzone">
+                <p style="font-size: 15px; font-weight: 500; margin-bottom: 6px;">
+                  Drag &amp; drop video file here, or click to browse
+                </p>
+                <p style="font-size: 12px; color: var(--text-muted);">
+                  Supports MP4, MKV, MOV, TS
+                </p>
+                <input type="file" id="videoFile" name="video" accept="video/*" />
+                <div id="file-details" style="display: none; margin-top: 10px; font-size: 13px; color: #60a5fa; font-weight: 600;"></div>
+              </div>
+
+              <div style="margin-top: 16px;">
+                <button id="uploadBtn" class="btn btn-primary" type="submit" style="width: 100%;">
+                  Upload Video
+                </button>
+              </div>
+            </form>
+
+            <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 20px 0;" />
+
+            <div>
+              <h3 style="font-size: 15px; margin-bottom: 12px;">Stream Controls</h3>
+              <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <button id="startStream" class="btn btn-success" style="flex: 1;">
+                  &#9658; Start Stream
+                </button>
+                <button id="stopStream" class="btn btn-danger" style="flex: 1;">
+                  &#9632; Stop Stream
+                </button>
+              </div>
+              <p id="stream-status-text" style="font-size: 13px; color: var(--text-muted);">
+                No stream running
+              </p>
+            </div>
+          </div>
+
+          <!-- Viewer & Share Links Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>&#128279;</span> HLS Viewer &amp; Stream URLs
+              </h2>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <label style="display: flex; justify-content: space-between;">
+                  <span>Direct LAN IP Viewer (Recommended for Mobile Hotspots)</span>
+                  <span style="color: #34d399; font-size: 11px;">Best Compatibility</span>
+                </label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <a id="lan-ip-player-link" href="/watch" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
+                    http://127.0.0.1:5000/watch
+                  </a>
+                  <button id="copy-lan-ip-btn" class="btn btn-secondary btn-sm">Copy</button>
+                </div>
+              </div>
+
+              <div>
+                <label style="display: flex; justify-content: space-between;">
+                  <span>mDNS Local Viewer</span>
+                  <span style="color: var(--text-muted); font-size: 11px;">Home / Office Wi-Fi</span>
+                </label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <a id="hls-player-link" href="/watch" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
+                    http://argus.local:5000/watch
+                  </a>
+                  <button id="copy-hls-player-btn" class="btn btn-secondary btn-sm">Copy</button>
+                </div>
+              </div>
+
+              <div>
+                <label>Direct HLS Stream (.m3u8 Playlist)</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <a id="hls-stream-link" href="/hls/index.m3u8" target="_blank" class="endpoint-val" style="flex: 1; text-decoration: underline;">
+                    http://argus.local:5000/hls/index.m3u8
+                  </a>
+                  <button id="copy-hls-stream-btn" class="btn btn-secondary btn-sm">Copy</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <script src="/script.js"></script>
+  </body>
+</html>

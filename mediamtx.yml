@@ -11,18 +11,11 @@ rtsp: true
 rtspAddress: :8554
 rtspTransports:
   - tcp
-rtmp: true
-rtmpAddress: :1935
+rtmp: false
 hls: true
 hlsAddress: :8888
-webrtc: true
-webrtcAddress: :8889
-webrtcLocalUDPAddress: :8189
-webrtcAdditionalHosts:
-  - 10.99.90.197
-  - argus.local
-  - localhost
-  - 127.0.0.1
+hlsAlwaysRemux: true
+webrtc: false
 paths:
   live: {}
   all_others: {}

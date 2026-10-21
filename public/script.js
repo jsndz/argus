@@ -28,31 +28,34 @@ function copyToClipboard(text, label = 'Link') {
 
 // Format endpoint links
 function updateViewerLinks(ip, hostname) {
-  const host = hostname || ip || window.location.hostname;
-  const webrtcUrl = `http://${host}:8889/live`;
-  const rtspUrl = `rtsp://${ip || host}:8554/live`;
-  const hlsUrl = `http://${host}:8888/live`;
+  const lanHost = ip || '127.0.0.1';
+  const mdnsHost = hostname || 'argus.local';
 
-  const webrtcLinkEl = document.getElementById('webrtc-link');
-  const rtspLinkEl = document.getElementById('rtsp-link');
-  const hlsLinkEl = document.getElementById('hls-link');
+  const lanPlayerUrl = `http://${lanHost}:5000/watch`;
+  const mdnsPlayerUrl = `http://${mdnsHost}:5000/watch`;
+  const hlsStreamUrl = `http://${lanHost}:5000/hls/index.m3u8`;
 
-  if (webrtcLinkEl) {
-    webrtcLinkEl.href = webrtcUrl;
-    webrtcLinkEl.innerText = webrtcUrl;
+  const lanPlayerLinkEl = document.getElementById('lan-ip-player-link');
+  const playerLinkEl = document.getElementById('hls-player-link');
+  const streamLinkEl = document.getElementById('hls-stream-link');
+
+  if (lanPlayerLinkEl) {
+    lanPlayerLinkEl.href = lanPlayerUrl;
+    lanPlayerLinkEl.innerText = lanPlayerUrl;
   }
-  if (rtspLinkEl) {
-    rtspLinkEl.innerText = rtspUrl;
+  if (playerLinkEl) {
+    playerLinkEl.href = mdnsPlayerUrl;
+    playerLinkEl.innerText = mdnsPlayerUrl;
   }
-  if (hlsLinkEl) {
-    hlsLinkEl.href = hlsUrl;
-    hlsLinkEl.innerText = hlsUrl;
+  if (streamLinkEl) {
+    streamLinkEl.href = hlsStreamUrl;
+    streamLinkEl.innerText = hlsStreamUrl;
   }
 
   const lanHeaderLink = document.getElementById('lan-header-link');
   if (lanHeaderLink) {
-    lanHeaderLink.href = `http://${host}:5000`;
-    lanHeaderLink.innerText = `LAN: http://${host}:5000`;
+    lanHeaderLink.href = `http://${lanHost}:5000`;
+    lanHeaderLink.innerText = `LAN: http://${lanHost}:5000`;
   }
 }
 
@@ -138,9 +141,8 @@ function updateMediaMtxUI(data) {
     }
   };
 
-  setEndpointBadge(rtspStatus, endpoints.rtsp);
-  setEndpointBadge(webrtcStatus, endpoints.webrtc);
   setEndpointBadge(hlsStatus, endpoints.hls);
+  setEndpointBadge(rtspStatus, endpoints.rtsp);
   setEndpointBadge(apiStatus, endpoints.api);
 
   if (data.status === 'healthy') {
@@ -184,6 +186,23 @@ function updateStreamUI(streamData) {
   }
 }
 
+// Render Firewall Alert Banner
+function updateFirewallUI(firewall) {
+  const alertBox = document.getElementById('firewall-alert-box');
+  const alertText = document.getElementById('firewall-alert-text');
+  const remedyCode = document.getElementById('firewall-remedy-code');
+
+  if (!alertBox) return;
+
+  if (firewall && (firewall.blocked || firewall.warning)) {
+    alertBox.style.display = 'block';
+    if (alertText) alertText.innerText = firewall.warning;
+    if (remedyCode) remedyCode.innerText = firewall.remedyCommand || '';
+  } else {
+    alertBox.style.display = 'none';
+  }
+}
+
 // Fetch complete system status
 async function refreshStatus() {
   try {
@@ -194,6 +213,7 @@ async function refreshStatus() {
     updateNetworkUI(currentStatus.network);
     updateMediaMtxUI(currentStatus.mediamtx);
     updateStreamUI(currentStatus.stream);
+    updateFirewallUI(currentStatus.firewall);
   } catch (err) {
     console.error('Failed to refresh status:', err);
   }
@@ -393,20 +413,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Copy buttons
-  const copyWebrtcBtn = document.getElementById('copy-webrtc-btn');
-  const copyRtspBtn = document.getElementById('copy-rtsp-btn');
+  const copyLanIpBtn = document.getElementById('copy-lan-ip-btn');
+  const copyPlayerBtn = document.getElementById('copy-hls-player-btn');
+  const copyStreamBtn = document.getElementById('copy-hls-stream-btn');
+  const copyFirewallBtn = document.getElementById('copy-firewall-btn');
 
-  if (copyWebrtcBtn) {
-    copyWebrtcBtn.addEventListener('click', () => {
-      const link = document.getElementById('webrtc-link').innerText;
-      copyToClipboard(link, 'WebRTC Player Link');
+  if (copyLanIpBtn) {
+    copyLanIpBtn.addEventListener('click', () => {
+      const link = document.getElementById('lan-ip-player-link').innerText;
+      copyToClipboard(link, 'Direct LAN IP Link');
     });
   }
 
-  if (copyRtspBtn) {
-    copyRtspBtn.addEventListener('click', () => {
-      const link = document.getElementById('rtsp-link').innerText;
-      copyToClipboard(link, 'RTSP Stream URL');
+  if (copyPlayerBtn) {
+    copyPlayerBtn.addEventListener('click', () => {
+      const link = document.getElementById('hls-player-link').innerText;
+      copyToClipboard(link, 'mDNS Player Link');
+    });
+  }
+
+  if (copyStreamBtn) {
+    copyStreamBtn.addEventListener('click', () => {
+      const link = document.getElementById('hls-stream-link').innerText;
+      copyToClipboard(link, 'HLS Stream Link');
+    });
+  }
+
+  if (copyFirewallBtn) {
+    copyFirewallBtn.addEventListener('click', () => {
+      const cmd = document.getElementById('firewall-remedy-code').innerText;
+      copyToClipboard(cmd, 'Firewall Fix Command');
     });
   }
 });
