@@ -106,11 +106,11 @@ function updateStreamsGallery(activeStreams, host) {
 
       <div class="stream-card-body">
         <div class="stream-card-title">${s.name || s.fileName || 'Live Channel Feed'}</div>
-        <div style="font-family: var(--font-body); font-size: 13px; color: #444444; margin-top: 4px;">
-          Transmitting video: <em>${s.fileName || 'Video File'}</em>
+        <div style="font-size: 13px; color: var(--color-ink-muted); margin-top: 4px;">
+          Video: <em>${s.fileName || 'Video File'}</em>
         </div>
-        <div style="font-family: var(--font-body); font-size: 12px; color: #666666; margin-top: 4px;">
-          Broadcast started at ${startTimeStr} &bull; 1080p HLS
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-dim); margin-top: 4px;">
+          Started: ${startTimeStr} &bull; 1080p HLS
         </div>
       </div>
 

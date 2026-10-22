@@ -217,17 +217,16 @@ function updateMediaLibraryUI(mediaList) {
       const timeStr = f.uploadedAt ? new Date(f.uploadedAt).toLocaleTimeString() : '';
 
       const row = document.createElement('div');
-      row.style.cssText = 'background: #ffffff; border: 1px solid var(--color-frame-ink); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; box-shadow: 2px 2px 0 var(--color-frame-ink);';
+      row.className = 'retro-list-item';
 
       row.innerHTML = `
         <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
-          <div style="font-family: var(--font-heading); font-weight: 700; font-size: 13px; color: #000000; text-overflow: ellipsis; overflow: hidden;" title="${f.originalName}">${f.originalName}</div>
-          <div style="font-family: var(--font-body); font-size: 12px; color: #444444;">${sizeMb} MB &bull; Stored: ${timeStr}</div>
+          <div class="retro-item-title" title="${f.originalName}">${f.originalName}</div>
+          <div class="retro-item-sub">${sizeMb} MB &bull; Stored: ${timeStr}</div>
         </div>
         <div style="display: flex; gap: 6px; flex-shrink: 0;">
-          <button class="btn btn-success btn-sm quick-stream-btn" data-id="${f.id}" data-name="${encodeURIComponent(f.originalName)}" style="font-size: 11px; padding: 4px 8px;" title="Stream immediately with auto channel ID">&#9658; Stream Now</button>
-          <button class="btn btn-secondary btn-sm select-file-btn" data-id="${f.id}" data-name="${encodeURIComponent(f.originalName)}" style="font-size: 11px; padding: 4px 8px;" title="Configure channel details in form below">Custom</button>
-          <button class="btn btn-danger btn-sm delete-file-btn" data-id="${f.id}" style="font-size: 11px; padding: 4px 8px;">Delete</button>
+          <button class="btn btn-success btn-sm quick-stream-btn" data-id="${f.id}" data-name="${encodeURIComponent(f.originalName)}" title="Stream immediately with auto channel ID">&#9658; Stream</button>
+          <button class="btn btn-danger btn-sm delete-file-btn" data-id="${f.id}" title="Delete video from vault">&#10005; Delete</button>
         </div>
       `;
       listContainer.appendChild(row);
@@ -258,7 +257,7 @@ function updateActiveStreamsUI(streamsList) {
 
   if (listContainer) {
     if (streams.length === 0) {
-      listContainer.innerHTML = '<p id="no-streams-msg" style="font-size: 13px; font-style: italic;">No active streams running. Launch a stream below or choose from the Media Vault!</p>';
+      listContainer.innerHTML = '<p id="no-streams-msg" style="font-size: 13px; color: var(--color-ink-muted); font-style: italic;">No active streams running. Launch a stream below or choose from the Media Vault!</p>';
       return;
     }
 
@@ -268,21 +267,21 @@ function updateActiveStreamsUI(streamsList) {
     streams.forEach((s) => {
       const hlsFullUrl = `http://${host}:5000/hls/${s.id}/index.m3u8`;
       const item = document.createElement('div');
-      item.style.cssText = 'background: #ffffff; border: 1px solid var(--color-frame-ink); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: 2px 2px 0 var(--color-frame-ink);';
+      item.className = 'retro-stream-item';
 
       item.innerHTML = `
         <div style="flex: 1; min-width: 180px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span class="badge badge-live" style="font-size: 11px; padding: 2px 6px;">/${s.id}</span>
-            <strong style="font-family: var(--font-heading); color: #000000; font-size: 14px;">${s.name}</strong>
+            <strong style="font-family: var(--font-heading); color: #ffffff; font-size: 14px;">${s.name}</strong>
           </div>
-          <div style="font-family: var(--font-body); font-size: 12px; color: #333333; margin-top: 3px;">
+          <div class="retro-item-sub" style="margin-top: 3px;">
             Source: ${s.fileName || 'Video'} &bull; Transmitting since: ${new Date(s.startedAt).toLocaleTimeString()}
           </div>
         </div>
         <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
           <a href="/watch?stream=${s.id}" target="_blank" class="btn btn-primary btn-sm" style="text-decoration: none;">&#128065; Watch</a>
-          <button class="btn btn-secondary btn-sm copy-stream-hls-btn" data-url="${hlsFullUrl}">Copy HLS</button>
+          <button class="btn btn-secondary btn-sm copy-stream-hls-btn" data-url="${hlsFullUrl}">Copy Link</button>
           <button class="btn btn-danger btn-sm stop-single-stream-btn" data-id="${s.id}">Stop</button>
         </div>
       `;

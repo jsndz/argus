@@ -3,20 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Argus Stream Viewer - Dell 1996 Broadcast Arena</title>
+    <title>Argus Stream Viewer - Retro Broadcast Receiver</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <!-- The Literal Black Page Frame (8px) -->
+    <!-- Outer Workstation Frame -->
     <div class="page-outer-wrapper">
       <div class="page-inner-canvas">
-        <!-- Top Banner (Black with Dell-Red Hotline & Yellow Sticker) -->
+        <!-- Top Station Header -->
         <header class="top-banner">
           <div class="brand-block">
             <span class="brand-logo-badge">ARGUS</span>
             <div class="brand-text">
-              <span class="brand-title">ARGUS LIVE BROADCAST</span>
-              <span class="brand-tagline">HIGH PERFORMANCE VIDEO FOR LOCAL NETWORKS</span>
+              <span id="streamName" class="brand-title">ARGUS LIVE RECEIVER</span>
+              <span class="brand-tagline">Local Wi-Fi Video Player</span>
             </div>
           </div>
 
@@ -26,59 +26,23 @@
               <span class="badge-dot"></span> OFFLINE
             </div>
 
-            <!-- Share Button -->
+            <!-- Share / QR Button -->
             <button id="share-modal-btn" class="btn btn-secondary btn-sm" title="Scan QR Code to Watch on Mobile">
-              <span>&#128241;</span> Share / QR Code
+              <span>&#128241;</span> Share / QR
             </button>
 
-            <!-- Link to Admin -->
+            <!-- Control Room Link -->
             <a href="/admin" class="sticker-tab">
-              CONTROL <span class="purple-stripe">ROOM</span> &#9881;
+              CONTROL ROOM &#9881;
             </a>
           </div>
         </header>
 
-        <!-- 1996 Marquee Ticker -->
-        <div class="retro-ticker-container">
-          <span class="retro-ticker-label">ON-AIR</span>
-          <div class="retro-ticker-track">
-            *** LIVE STREAM RECEIVER INITIALIZED *** COMPATIBLE WITH APPLE SAFARI, GOOGLE CHROME, MOZILLA FIREFOX & MOBILE HANDSETS *** AUTO-SYNC LOW LATENCY HLS ***
-          </div>
-        </div>
-
-        <!-- Sub-Navigation Quick Bar -->
-        <nav class="sub-nav-bar">
-          <div class="sub-nav-links">
-            <a href="/admin">Control Room</a> &bull;
-            <a href="#activeStreamsGrid">All Live Streams</a> &bull;
-            <a href="#" onclick="window.location.reload();">Refresh Feed</a>
-          </div>
-          <div style="font-family: var(--font-heading); font-size: 11px; font-weight: bold;">
-            LOCAL BROADCAST: ARGUS.LOCAL
-          </div>
-        </nav>
-
-        <!-- Eyebrow Section Banner: Sky Tint -->
-        <div class="section-eyebrow section-eyebrow-sky">
-          <div>
-            <h1 id="streamName">ARGUS LIVE FEED</h1>
-            <div style="font-size: 13px; font-family: var(--font-body); margin-top: 2px;">
-              Direct Stream Transmitted via Local Area Network &bull; HLS 1080p
-            </div>
-          </div>
-          <!-- Readers' Choice Seal Sticker -->
-          <div class="cert-seal" title="PC Magazine Readers' Choice Award">
-            <span>PC MAG</span>
-            <strong>#1 LIVE</strong>
-            <span>CHOICE</span>
-          </div>
-        </div>
-
-        <!-- Main Arena Container -->
-        <main style="padding: 0 16px;">
+        <!-- Main Video Arena Container -->
+        <main style="padding: 16px;">
           <!-- Multi-Channel Selector Bar (When multiple streams are running) -->
-          <div id="channelBarContainer" style="display: none; margin-bottom: 12px; background: var(--tint-peach); padding: 8px 12px; border: 1px solid var(--color-frame-ink);">
-            <div style="font-family: var(--font-heading); font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 6px;">
+          <div id="channelBarContainer" style="display: none; max-width: 960px; margin: 0 auto 14px auto; background: var(--color-surface-sunken); padding: 8px 12px; border: 1px solid var(--border-subtle);">
+            <div style="font-family: var(--font-heading); font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-amber); margin-bottom: 6px;">
               Live Channels On Air (Click to switch):
             </div>
             <div id="channelButtons" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;"></div>
@@ -99,29 +63,29 @@
                   style="width: 100%; height: 100%; object-fit: contain; background: #000;"
                 ></video>
 
-                <!-- Tap to Unmute Overlay Button (Yellow Sticker) -->
+                <!-- Tap to Unmute Overlay Button -->
                 <button id="unmutePrompt" class="unmute-btn">
                   <span>&#128266;</span> Click to Unmute Audio
                 </button>
 
                 <!-- Offline / Reconnecting Screen -->
                 <div id="offlineOverlay" class="player-overlay">
-                  <div style="font-size: 36px; margin-bottom: 6px; color: #ff3333;">&#9654;</div>
+                  <div style="font-size: 32px; margin-bottom: 8px; color: var(--color-red);">&#9654;</div>
                   <h2 class="overlay-title">Stream is Currently Offline</h2>
                   <p class="overlay-subtitle">
-                    The broadcaster has not started streaming yet. When the live broadcast commences, this receiver will connect automatically.
+                    The broadcaster has not started streaming yet. When the live broadcast commences, video will start automatically.
                   </p>
-                  <div style="display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; color: #ffff00;">
-                    <span class="badge-dot pulse" style="background-color: #ffff00;"></span>
-                    <span id="reconnect-text">Listening for live broadcast on LAN...</span>
+                  <div style="display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; color: var(--color-amber);">
+                    <span class="badge-dot pulse" style="background-color: var(--color-amber);"></span>
+                    <span id="reconnect-text">Listening for live broadcast on Wi-Fi...</span>
                   </div>
                 </div>
               </div>
 
               <!-- Monitor Chassis Controls & LEDs -->
               <div class="crt-bottom-chassis">
-                <div class="chassis-brand">ARGUS COLOR DISPLAY / MODEL 1996</div>
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="chassis-brand">ARGUS BROADCAST MONITOR // MODEL 1996</div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                   <div class="chassis-led">
                     <span class="chassis-led-dot"></span>
                     <span>SIGNAL LOCKED</span>
@@ -134,86 +98,64 @@
             </div>
           </div>
 
-          <!-- All Live Video Streams Section (Sky Tint Ribbon Card) -->
-          <section class="ribbon-card" style="margin-top: 20px;">
-            <div class="ribbon-card-title" style="background-color: var(--tint-sky);">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span>&#128250; ALL LIVE VIDEO STREAMS</span>
-                <span class="new-burst-sticker">CHANNELS</span>
-              </div>
-              <div id="streams-count-indicator" class="badge badge-idle">
-                0 Streams Active
-              </div>
-            </div>
-
-            <div class="ribbon-card-body" style="background-color: #f9f9f9;">
-              <p style="font-size: 13px; margin-bottom: 12px; color: #333333;">
-                Click any channel card below to switch playback instantly without reloading your browser:
-              </p>
-
-              <!-- Grid of Stream Cards -->
-              <div id="activeStreamsGrid" class="streams-gallery-grid">
-                <!-- Dynamically populated by watch.js -->
+          <!-- All Live Video Streams Section -->
+          <div style="max-width: 960px; margin: 16px auto 0 auto;">
+            <section class="ribbon-card">
+              <div class="ribbon-card-title">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span>&#128250; ALL LIVE CHANNELS</span>
+                  <span class="new-burst-sticker">CHANNELS</span>
+                </div>
+                <div id="streams-count-indicator" class="badge badge-idle">
+                  0 Streams Active
+                </div>
               </div>
 
-              <!-- Empty State when no streams are live -->
-              <div id="noStreamsCard" style="background: #ffffff; border: 2px dashed var(--color-frame-ink); padding: 24px; text-align: center; margin-top: 8px; display: none;">
-                <div style="font-size: 32px; margin-bottom: 6px;">&#128257;</div>
-                <h3 style="font-family: var(--font-heading); font-size: 16px; font-weight: bold; margin-bottom: 4px;">
-                  No Video Streams Currently Broadcasting
-                </h3>
-                <p style="font-size: 13px; color: #555555; max-width: 440px; margin: 0 auto 14px auto;">
-                  The broadcaster has not started streaming any videos yet. When a stream begins, it will appear here automatically.
-                </p>
-                <a href="/admin" class="btn btn-primary btn-sm" style="text-decoration: none;">
-                  <span>&#9881;</span> Open Admin Room to Start a Stream
-                </a>
+              <div class="ribbon-card-body" style="background-color: var(--color-surface-sunken);">
+                <!-- Grid of Stream Cards -->
+                <div id="activeStreamsGrid" class="streams-gallery-grid">
+                  <!-- Dynamically populated by watch.js -->
+                </div>
+
+                <!-- Empty State when no streams are live -->
+                <div id="noStreamsCard" style="background: var(--color-surface); border: 1px dashed var(--border-subtle); padding: 24px; text-align: center; margin-top: 8px; display: none;">
+                  <div style="font-size: 28px; margin-bottom: 6px;">&#128257;</div>
+                  <h3 style="font-family: var(--font-heading); font-size: 14px; font-weight: bold; margin-bottom: 4px; color: #ffffff;">
+                    No Live Streams Running Right Now
+                  </h3>
+                  <p style="font-size: 12px; color: var(--color-ink-muted); max-width: 420px; margin: 0 auto 12px auto;">
+                    When a video broadcast starts, it will appear here automatically.
+                  </p>
+                  <a href="/admin" class="btn btn-primary btn-sm" style="text-decoration: none;">
+                    <span>&#9881;</span> Open Broadcast Studio
+                  </a>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
         </main>
 
-        <!-- 1996 Footer Band -->
+        <!-- Clean Station Footer -->
         <footer class="footer-band">
           <div class="footer-icon-nav">
             <a href="/watch" class="footer-nav-item">
-              <span class="footer-nav-icon">&#128250;</span>
+              <span>&#128250;</span>
               <span>Watch Live</span>
             </a>
             <a href="/admin" class="footer-nav-item">
-              <span class="footer-nav-icon">&#9881;</span>
-              <span>Control Room</span>
-            </a>
-            <a href="/admin#section-upload" class="footer-nav-item">
-              <span class="footer-nav-icon">&#128194;</span>
-              <span>Media Vault</span>
-            </a>
-            <a href="/admin#section-network" class="footer-nav-item">
-              <span class="footer-nav-icon">&#127760;</span>
-              <span>Network</span>
+              <span>&#9881;</span>
+              <span>Broadcast Studio</span>
             </a>
           </div>
 
-          <div class="footer-legal">
-            <p>
-              <a href="#">Copyright &copy; 1996-2026 Argus Video Systems Corporation</a>. All rights reserved.
-            </p>
-            <p style="font-size: 11px; margin-top: 4px; color: #555555;">
-              This site is best viewed with Netscape Navigator 3.0 or Internet Explorer 3.0 at 800&times;600 resolution.
-            </p>
-          </div>
-
-          <div class="footer-badges-row">
-            <span class="retro-tech-pill">LOW-LATENCY HLS</span>
-            <span class="retro-tech-pill">HTML5 VIDEO ENGINE</span>
-            <span class="retro-tech-pill">HARDWARE BEVELS</span>
-            <span class="retro-tech-pill">ZERO CLOUD REQUIRED</span>
+          <div style="color: var(--color-ink-muted); font-size: 11px; margin-top: 6px;">
+            Argus Video Broadcast System &bull; 100% Local Wi-Fi &bull; Zero Cloud
           </div>
         </footer>
       </div>
     </div>
 
-    <!-- QR Code Share Modal Dialog (Win95 Dialog Box Chrome) -->
+    <!-- QR Code Share Modal Dialog -->
     <div id="shareModal" class="modal-backdrop">
       <div class="modal-dialog">
         <div class="modal-title-bar">
@@ -221,11 +163,11 @@
           <button id="closeModalBtn" class="modal-close-btn">&#10005;</button>
         </div>
         <div class="modal-content-body">
-          <p style="font-size: 13px; margin-bottom: 8px;">
+          <p style="font-size: 13px; color: var(--color-ink-muted); margin-bottom: 8px;">
             Connect your phone to the same Wi-Fi network and scan this QR code:
           </p>
           <img id="qrImage" class="modal-qr-img" alt="QR Code" />
-          <div id="shareUrlDisplay" style="font-family: var(--font-mono); font-size: 12px; color: #000080; font-weight: bold; margin-bottom: 14px; word-break: break-all;">
+          <div id="shareUrlDisplay" style="font-family: var(--font-mono); font-size: 12px; color: var(--color-cyan); font-weight: bold; margin-bottom: 14px; word-break: break-all;">
             ...
           </div>
           <div style="display: flex; gap: 10px; justify-content: center;">

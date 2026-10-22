@@ -3,286 +3,166 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Argus Video Broadcast - Dell 1996 Control Room</title>
+    <title>Argus Broadcast Studio - Retro Control Console</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <!-- The Literal Black Page Frame (8px) -->
+    <!-- Outer Workstation Frame -->
     <div class="page-outer-wrapper">
       <div class="page-inner-canvas">
-        <!-- Top Banner (Black with Dell-Red Hotline & Yellow Sticker) -->
+        <!-- Top Station Header -->
         <header class="top-banner">
           <div class="brand-block">
             <span class="brand-logo-badge">ARGUS</span>
             <div class="brand-text">
-              <span class="brand-title">ARGUS VIDEO SYSTEMS</span>
-              <span class="brand-tagline">BUILD YOUR OWN BROADCAST. ZERO-CONFIG LAN.</span>
+              <span class="brand-title">ARGUS BROADCAST STUDIO</span>
+              <span class="brand-tagline">Local Wi-Fi Video Broadcasting</span>
             </div>
           </div>
 
           <div class="top-banner-right">
-            <!-- Screaming Red Phone / LAN IP Callout -->
-            <a id="lan-header-link" class="phone-callout" href="#" target="_blank" title="Open LAN Endpoint">
-              <span>&#9742;</span> DIRECT: <strong id="lan-ip-header-text">10.99.90.197:5000</strong>
+            <!-- Direct Network Address -->
+            <a id="lan-header-link" class="phone-callout" href="#" target="_blank" title="Direct Wi-Fi Address">
+              <span>&#127760;</span> WI-FI: <strong id="lan-ip-header-text">10.99.90.197:5000</strong>
             </a>
 
-            <!-- Live Status Indicator -->
+            <!-- System Live / Idle Indicator -->
             <span id="stream-status-badge" class="badge badge-idle">
               <span class="badge-dot"></span> IDLE
             </span>
 
-            <!-- Yellow BUY A DELL / WATCH A STREAM Sticker Tab -->
+            <!-- Watch Live Stream Button -->
             <a href="/watch" class="sticker-tab" target="_blank">
-              WATCH <span class="purple-stripe">a</span> STREAM &#9658;
+              WATCH LIVE FEED &#9658;
             </a>
           </div>
         </header>
 
-        <!-- 1996 Marquee Ticker: Real-time System Telemetry -->
-        <div class="retro-ticker-container">
-          <span class="retro-ticker-label">ARGUS FLASH</span>
-          <div class="retro-ticker-track" id="telemetry-ticker-text">
-            *** WELCOME TO ARGUS VIDEO DISTRIBUTION SYSTEM 1996 EDITION *** HLS STREAMING ACTIVE ON PORT 5000 *** ZERO CLOUD CONFIGURATION REQUIRED *** AUTOMATIC MDNS HOSTNAME: ARGUS.LOCAL *** READY FOR LAN BROADCAST ***
+        <!-- Prominent Wi-Fi Share Hero Banner -->
+        <div class="share-hero-banner">
+          <div class="share-hero-left">
+            <div class="share-hero-label">Share link with viewers on your Wi-Fi:</div>
+            <div class="share-hero-link-wrap">
+              <a id="lan-ip-player-link" class="share-hero-link" href="#" target="_blank">Detecting address...</a>
+            </div>
+            <div class="share-hero-help">
+              Anyone connected to the same Wi-Fi can open this link on their phone, tablet, or PC to watch.
+            </div>
+          </div>
+          <div class="share-hero-actions">
+            <button id="copy-lan-ip-btn" class="btn btn-primary">
+              <span>&#128203;</span> Copy Watch Link
+            </button>
+            <a href="/watch" target="_blank" class="btn btn-secondary">
+              <span>&#128065;</span> Open Player
+            </a>
+          </div>
+
+          <!-- Hidden anchors preserved for script.js compatibility -->
+          <div style="display: none;">
+            <a id="hls-player-link" href="#"></a>
+            <button id="copy-hls-player-btn"></button>
+            <a id="hls-stream-link" href="#"></a>
+            <button id="copy-hls-stream-btn"></button>
           </div>
         </div>
 
-        <!-- Sub-Navigation Quick Bar -->
-        <nav class="sub-nav-bar">
-          <div class="sub-nav-links">
-            <a href="#section-network">1. Network Interface</a> &bull;
-            <a href="#section-streams">2. Live Channels</a> &bull;
-            <a href="#section-upload">3. Multi-Video Vault</a> &bull;
-            <a href="#section-engine">4. MediaMTX Engine</a> &bull;
-            <a href="/watch" target="_blank">5. Dedicated Viewer Page</a>
-          </div>
-          <div style="font-family: var(--font-heading); font-size: 11px; font-weight: bold;">
-            HOTLINE: 1-800-ARGUS-LAN
-          </div>
-        </nav>
-
-        <!-- Eyebrow Section Banner: Olive (Signature 1996 Eyebrow) -->
-        <div class="section-eyebrow section-eyebrow-olive">
-          <div>
-            <h1>BROADCAST CONTROL ROOM</h1>
-            <div style="font-size: 13px; font-family: var(--font-body); margin-top: 2px;">
-              Enterprise-Grade Ultra-Low Latency Video Streaming for Local Networks
-            </div>
-          </div>
-          <!-- PC Magazine Award Seal Sticker -->
-          <div class="cert-seal" title="PC Magazine Readers' Choice Award 1996">
-            <span>PC MAG</span>
-            <strong>#1 LAN</strong>
-            <span>CHOICE</span>
-          </div>
-        </div>
-
-        <!-- Main Content Area: 2-Column Catalog Layout -->
-        <div class="content-grid">
-          <!-- Left Rail (28%) -->
-          <aside class="left-rail">
-            <!-- Dell-Red Primary CTA Panel -->
-            <div class="cta-block-red">
-              <h3>At Argus.local</h3>
-              <p>
-                We'll help you select your video files, transcode with FFmpeg, and broadcast high-definition 1080p HLS video to any smartphone or PC on your network.
-              </p>
-              <p style="font-size: 12px; margin-bottom: 0;">
-                No Internet connection or third-party cloud required.
-              </p>
-            </div>
-
-            <!-- Host Firewall Alert Banner (Periwinkle Tint Ribbon) -->
-            <div id="firewall-alert-box" class="ribbon-card" style="display: none;">
-              <div class="ribbon-card-title" style="background-color: var(--color-primary); color: #ffffff;">
-                <span>&#9888; SECURITY DIAGNOSTIC</span>
-              </div>
-              <div class="ribbon-card-body ribbon-card-body-periwinkle">
-                <p id="firewall-alert-text" style="font-weight: bold; margin-bottom: 8px;"></p>
-                <div style="margin-bottom: 8px;">
-                  <code id="firewall-remedy-code" style="display: block; background: #ffffff; border: 1px solid #000; padding: 4px; font-family: var(--font-mono); font-size: 11px;"></code>
-                </div>
-                <button id="copy-firewall-btn" class="btn btn-primary btn-sm" style="width: 100%;">Copy Fix Command</button>
-              </div>
-            </div>
-
-            <!-- Network Discovery & Interface Card (Lime Tint Ribbon) -->
-            <section id="section-network" class="ribbon-card">
-              <div class="ribbon-card-title">
-                <span>&#127760; NETWORK DISCOVERY</span>
-                <span id="active-hostname-display" class="badge">argus.local</span>
-              </div>
-              <div class="ribbon-card-body ribbon-card-body-lime">
-                <div class="form-group">
-                  <label for="interface-select">Active Network Adapter & IP</label>
-                  <select id="interface-select">
-                    <option value="">Detecting interfaces...</option>
-                  </select>
-                  <div class="form-help">
-                    Active IP: <strong id="active-ip-display">Detecting...</strong>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="hide-virtual-check" checked />
-                    <span>Filter virtual/docker adapters</span>
-                  </label>
-                </div>
-
-                <button id="apply-nic-btn" class="btn btn-primary btn-sm" style="width: 100%;">
-                  Rebind Network Interface
-                </button>
-              </div>
-            </section>
-
-            <!-- MediaMTX Engine Diagnostics Card (Steel Tint Ribbon) -->
-            <section id="section-engine" class="ribbon-card">
-              <div class="ribbon-card-title">
-                <span>&#9881; MEDIAMTX CORE ENGINE</span>
-                <span id="mtx-status-indicator" class="badge badge-idle">Probing...</span>
-              </div>
-              <div class="ribbon-card-body ribbon-card-body-steel">
-                <div style="font-size: 13px; margin-bottom: 10px;">
-                  Protocol Listeners:
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 6px; font-family: var(--font-heading); font-size: 11px;">
-                  <div style="display: flex; justify-content: space-between; background: #ffffff; padding: 4px 8px; border: 1px solid #000;">
-                    <span>HLS Stream (Port 8888 &bull; 5000 Proxy):</span>
-                    <span id="mtx-hls-status" class="badge badge-live">ONLINE</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; background: #ffffff; padding: 4px 8px; border: 1px solid #000;">
-                    <span>RTSP Ingest (Port 8554 TCP):</span>
-                    <span id="mtx-rtsp-status" class="badge badge-live">ONLINE</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; background: #ffffff; padding: 4px 8px; border: 1px solid #000;">
-                    <span>MediaMTX API (Port 9997):</span>
-                    <span id="mtx-api-status" class="badge badge-live">ONLINE</span>
-                  </div>
-                </div>
-
-                <div id="mtx-error-alert" style="display: none; margin-top: 10px; background: #ffe6e6; border: 1px solid #cc0000; padding: 6px; font-size: 12px; color: #cc0000;">
-                  <span id="mtx-error-message"></span>
-                </div>
-
-                <button id="restart-mtx-btn" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 10px;">
-                  Restart MediaMTX Service
-                </button>
-              </div>
-            </section>
-
-            <!-- Quick Endpoint Links Card -->
-            <div class="ribbon-card">
-              <div class="ribbon-card-title">
-                <span>&#128279; BROADCAST LINKS</span>
-              </div>
-              <div class="ribbon-card-body" style="background-color: #f7f7f7;">
-                <div style="margin-bottom: 8px;">
-                  <div style="font-size: 11px; font-family: var(--font-heading); font-weight: bold; text-transform: uppercase;">Direct LAN Viewer:</div>
-                  <a id="lan-ip-player-link" href="#" target="_blank" style="color: var(--color-link); word-break: break-all; font-size: 12px;">Detecting...</a>
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <div style="font-size: 11px; font-family: var(--font-heading); font-weight: bold; text-transform: uppercase;">mDNS Viewer (ZeroConf):</div>
-                  <a id="hls-player-link" href="#" target="_blank" style="color: var(--color-link); word-break: break-all; font-size: 12px;">http://argus.local:5000/watch</a>
-                </div>
-                <div>
-                  <div style="font-size: 11px; font-family: var(--font-heading); font-weight: bold; text-transform: uppercase;">Direct HLS Playlist:</div>
-                  <a id="hls-stream-link" href="#" target="_blank" style="color: var(--color-link); word-break: break-all; font-size: 12px;">/hls/index.m3u8</a>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          <!-- Right Column (72%) -->
-          <main class="main-column">
-            <!-- Active Streams Manager (Salmon Tint Ribbon) -->
+        <!-- Main Symmetrical 2-Column Workspace -->
+        <div class="workspace-grid">
+          <!-- Column 1: Live Broadcasts & Stream Launcher -->
+          <div class="workspace-col">
+            <!-- Box 1: Active Live Channels -->
             <section id="section-streams" class="ribbon-card">
               <div class="ribbon-card-title">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span>&#128250; ACTIVE LIVE STREAMS</span>
+                  <span>&#128250; LIVE CHANNELS</span>
                   <span class="new-burst-sticker">ON AIR</span>
                 </div>
-                <div style="display: flex; gap: 6px; align-items: center;">
+                <div style="display: flex; gap: 8px; align-items: center;">
                   <span id="active-streams-badge" class="badge badge-idle">0 Active</span>
                   <button id="stop-all-streams-btn" class="btn btn-danger btn-sm" style="display: none;">Stop All</button>
                 </div>
               </div>
 
-              <div class="ribbon-card-body ribbon-card-body-salmon">
+              <div class="ribbon-card-body">
                 <div id="active-streams-list" style="display: flex; flex-direction: column; gap: 10px;">
-                  <p id="no-streams-msg" style="font-size: 13px; font-style: italic;">
-                    No active streams running. Launch a stream below or choose a file from the Media Vault!
+                  <p id="no-streams-msg" style="font-size: 13px; color: var(--color-ink-muted); font-style: italic;">
+                    No broadcast running. Pick a video below and click "Start Broadcasting" to go live!
                   </p>
                 </div>
               </div>
             </section>
 
-            <!-- Channel Launcher Form (Peach Tint Ribbon) -->
-            <section class="ribbon-card">
+            <!-- Box 2: Start a Broadcast Form -->
+            <section id="section-launch" class="ribbon-card">
               <div class="ribbon-card-title">
-                <span>&#9654; LAUNCH A STREAMING CHANNEL</span>
+                <span>&#9654; START BROADCASTING</span>
               </div>
-              <div class="ribbon-card-body ribbon-card-body-peach">
-                <form id="launchStreamForm" style="display: flex; flex-direction: column; gap: 10px;">
-                  <div class="form-group" style="margin-bottom: 0;">
-                    <label for="stream-file-select">Select Video from Vault</label>
+              <div class="ribbon-card-body">
+                <form id="launchStreamForm" style="display: flex; flex-direction: column; gap: 14px;">
+                  <div class="form-group">
+                    <label for="stream-file-select">Choose Video from Vault</label>
                     <select id="stream-file-select" required>
-                      <option value="">Loading media library...</option>
+                      <option value="">Loading video library...</option>
                     </select>
                   </div>
 
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                      <label for="stream-id-input">Channel Slug (e.g. live, drone, stage)</label>
-                      <input type="text" id="stream-id-input" placeholder="live" value="live" pattern="[a-zA-Z0-9_-]+" required />
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
                       <label for="stream-name-input">Channel Title</label>
                       <input type="text" id="stream-name-input" placeholder="Main Broadcast" />
                     </div>
+                    <div class="form-group">
+                      <label for="stream-id-input">Channel URL Name</label>
+                      <input type="text" id="stream-id-input" placeholder="live" value="live" pattern="[a-zA-Z0-9_-]+" required />
+                    </div>
                   </div>
 
-                  <button id="launch-stream-btn" class="btn btn-success" type="submit" style="margin-top: 6px; padding: 8px 16px;">
-                    &#9658; Start Streaming Channel Now
+                  <button id="launch-stream-btn" class="btn btn-success" type="submit" style="width: 100%; height: 40px; font-size: 13px;">
+                    &#9658; Start Broadcasting Now
                   </button>
                 </form>
               </div>
             </section>
+          </div>
 
-            <!-- Multi-Video File Uploader & Media Vault (Sage Tint Ribbon) -->
+          <!-- Column 2: Video Vault & Uploader -->
+          <div class="workspace-col">
+            <!-- Box 3: Video Vault -->
             <section id="section-upload" class="ribbon-card">
               <div class="ribbon-card-title">
-                <span>&#128193; MULTI-VIDEO MEDIA VAULT</span>
-                <div style="display: flex; gap: 6px; align-items: center;">
+                <span>&#128193; VIDEO VAULT</span>
+                <div style="display: flex; gap: 8px; align-items: center;">
                   <span id="upload-count-badge" class="badge">0 videos</span>
                   <button id="refresh-media-btn" class="btn btn-secondary btn-sm">Refresh</button>
                 </div>
               </div>
 
-              <div class="ribbon-card-body ribbon-card-body-sage">
+              <div class="ribbon-card-body">
                 <!-- Drag and drop upload box -->
                 <div id="upload-dropzone" class="upload-dropzone" style="margin-bottom: 14px;">
                   <div style="font-size: 28px; margin-bottom: 6px;">&#128229;</div>
-                  <div style="font-family: var(--font-heading); font-size: 13px; font-weight: 700; text-transform: uppercase;">
-                    Drag & Drop Video Files Here
+                  <div style="font-family: var(--font-heading); font-size: 13px; font-weight: 700; text-transform: uppercase; color: #ffffff;">
+                    Drag &amp; Drop Video Files Here
                   </div>
-                  <div style="font-size: 12px; color: var(--color-muted); margin: 4px 0 10px 0;">
-                    Supports MP4, MKV, MOV, TS, WebM, AVI (No size limit &bull; up to 100 GB)
+                  <div style="font-size: 12px; color: var(--color-ink-muted); margin: 4px 0 10px 0;">
+                    Supports MP4, MKV, MOV, WebM, AVI (up to 100 GB)
                   </div>
                   <input type="file" id="video-file-input" name="videos" multiple accept="video/*,.mkv,.mp4,.mov,.ts,.webm,.avi" style="display: none;" />
                   <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;">
                     <button type="button" id="browse-btn" class="btn btn-secondary btn-sm">
-                      Browse Computer...
+                      Browse Files...
                     </button>
                     <button type="button" id="start-upload-btn" class="btn btn-primary btn-sm" style="display: none;">
                       &#128228; Upload Selected Files
                     </button>
                   </div>
-                  <div id="selected-files-summary" style="display: none; margin-top: 10px; font-size: 12px; font-weight: bold; color: var(--color-primary);"></div>
+                  <div id="selected-files-summary" style="display: none; margin-top: 10px; font-size: 12px; font-weight: bold; color: var(--color-cyan);"></div>
                 </div>
 
                 <!-- Clean Progress Bar -->
                 <div id="upload-progress-container" style="display: none; margin-bottom: 14px;">
-                  <div style="display: flex; justify-content: space-between; font-family: var(--font-heading); font-size: 11px; font-weight: bold; margin-bottom: 4px;">
+                  <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; font-weight: bold; margin-bottom: 4px;">
                     <span id="upload-status-text">Uploading: 0%</span>
                     <span id="upload-speed-text"></span>
                   </div>
@@ -292,52 +172,110 @@
                 </div>
 
                 <!-- Media Library List -->
-                <div style="font-family: var(--font-heading); font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 6px;">
-                  Stored Video Catalog:
+                <div style="font-family: var(--font-heading); font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-ink-muted); margin-bottom: 8px;">
+                  Stored Videos in Vault:
                 </div>
                 <div id="media-library-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto;">
-                  <p style="font-size: 13px; font-style: italic;">Loading media files...</p>
+                  <p style="font-size: 13px; color: var(--color-ink-muted); font-style: italic;">Loading media files...</p>
                 </div>
               </div>
             </section>
-          </main>
+          </div>
         </div>
 
-        <!-- 1996 Footer Band (With Classic Green Dividing Line) -->
+        <!-- Full-Width Bottom Box: Network & System Settings -->
+        <div class="bottom-settings-card">
+          <div class="ribbon-card-title">
+            <span>&#9881; WI-FI NETWORK &amp; SYSTEM SETTINGS</span>
+            <span id="mtx-status-indicator" class="badge badge-idle">Probing...</span>
+          </div>
+          <div class="settings-grid">
+            <!-- Network Connection -->
+            <div>
+              <div class="form-group">
+                <label for="interface-select">Active Network Adapter</label>
+                <select id="interface-select">
+                  <option value="">Detecting connection...</option>
+                </select>
+                <div class="form-help">
+                  Active IP: <strong id="active-ip-display" style="color: #ffffff;">Detecting...</strong>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="hide-virtual-check" checked />
+                  <span>Hide virtual / internal adapters</span>
+                </label>
+              </div>
+
+              <button id="apply-nic-btn" class="btn btn-primary btn-sm" style="width: 100%;">
+                Update Network Connection
+              </button>
+            </div>
+
+            <!-- System Diagnostics & Firewall -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; color: var(--color-ink-muted); font-weight: 600;">Streaming Service:</span>
+                <span id="mtx-hls-status" class="badge badge-live">ONLINE</span>
+              </div>
+
+              <!-- Collapsible Advanced Engine Diagnostics -->
+              <details class="retro-details">
+                <summary>&#9656; Advanced Technical Diagnostics</summary>
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-family: var(--font-mono); font-size: 11px;">
+                  <div style="display: flex; justify-content: space-between; background: var(--color-surface); padding: 4px 6px; border: 1px solid var(--border-subtle);">
+                    <span>Local Hostname:</span>
+                    <span id="active-hostname-display" style="color: var(--color-cyan);">argus.local</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; background: var(--color-surface); padding: 4px 6px; border: 1px solid var(--border-subtle);">
+                    <span>HLS Stream Proxy:</span>
+                    <span style="color: var(--color-phosphor-green);">Port 5000 / 8888</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; background: var(--color-surface); padding: 4px 6px; border: 1px solid var(--border-subtle);">
+                    <span>RTSP Ingest:</span>
+                    <span id="mtx-rtsp-status" style="color: var(--color-phosphor-green);">Port 8554</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; background: var(--color-surface); padding: 4px 6px; border: 1px solid var(--border-subtle);">
+                    <span>Engine API:</span>
+                    <span id="mtx-api-status" style="color: var(--color-phosphor-green);">Port 9997</span>
+                  </div>
+                </div>
+                <button id="restart-mtx-btn" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 10px;">
+                  Restart Streaming Engine
+                </button>
+              </details>
+
+              <!-- Firewall alert box (only shown if port blocked) -->
+              <div id="firewall-alert-box" style="display: none; margin-top: 10px; background: var(--color-red-dim); border: 1px solid var(--color-red); padding: 8px;">
+                <p id="firewall-alert-text" style="font-size: 11px; color: var(--color-red); font-weight: bold; margin-bottom: 6px;"></p>
+                <code id="firewall-remedy-code" style="display: block; background: #000; border: 1px solid var(--border-subtle); padding: 4px; font-family: var(--font-mono); font-size: 11px; color: #fff; margin-bottom: 6px;"></code>
+                <button id="copy-firewall-btn" class="btn btn-danger btn-sm" style="width: 100%;">Copy Fix Command</button>
+              </div>
+
+              <div id="mtx-error-alert" style="display: none; margin-top: 10px; background: var(--color-red-dim); border: 1px solid var(--color-red); padding: 8px; font-size: 12px; color: #ff8888;">
+                <span id="mtx-error-message"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean Station Footer -->
         <footer class="footer-band">
           <div class="footer-icon-nav">
             <a href="/watch" target="_blank" class="footer-nav-item">
-              <span class="footer-nav-icon">&#128250;</span>
-              <span>Watch Live</span>
+              <span>&#128250;</span>
+              <span>Watch Live Feed</span>
             </a>
             <a href="/admin" class="footer-nav-item">
-              <span class="footer-nav-icon">&#9881;</span>
-              <span>Control Room</span>
-            </a>
-            <a href="#section-upload" class="footer-nav-item">
-              <span class="footer-nav-icon">&#128194;</span>
-              <span>Media Vault</span>
-            </a>
-            <a href="#section-network" class="footer-nav-item">
-              <span class="footer-nav-icon">&#127760;</span>
-              <span>Network</span>
+              <span>&#9881;</span>
+              <span>Broadcast Studio</span>
             </a>
           </div>
 
-          <div class="footer-legal">
-            <p>
-              <a href="#">Copyright &copy; 1996-2026 Argus Video Systems Corporation</a>. All rights reserved.
-            </p>
-            <p style="font-size: 11px; margin-top: 4px; color: #555555;">
-              This site is best viewed with Netscape Navigator 3.0 or Internet Explorer 3.0 at 800&times;600 resolution.
-            </p>
-          </div>
-
-          <div class="footer-badges-row">
-            <span class="retro-tech-pill">POWERED BY MEDIAMTX</span>
-            <span class="retro-tech-pill">FFMPEG H.264 / AAC</span>
-            <span class="retro-tech-pill">AVAHI ZERO-CONF</span>
-            <span class="retro-tech-pill">100% LOCAL LAN</span>
+          <div style="color: var(--color-ink-muted); font-size: 11px; margin-top: 6px;">
+            Argus Video Broadcast System &bull; 100% Local Wi-Fi &bull; Zero Cloud Dependency
           </div>
         </footer>
       </div>
