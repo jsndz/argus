@@ -100,4 +100,33 @@ test('Integration: Express API serves network interfaces and updates configurati
   assert.equal(qrRes.status, 200);
   const qrData = await qrRes.json();
   assert.ok(qrData.qr.startsWith('data:image/png;base64,'));
+
+  // 6. Test GET /api/media
+  const { mediaLibrary } = require('../lib/media');
+  app.get('/api/media', (req, res) => {
+    res.json({ media: mediaLibrary.getAll() });
+  });
+  const mediaRes = await fetch(`${baseUrl}/api/media`);
+  assert.equal(mediaRes.status, 200);
+  const mediaData = await mediaRes.json();
+  assert.ok(Array.isArray(mediaData.media));
+
+  // 7. Test GET /api/streams & POST /api/streams/stop-all
+  const { streamManager } = require('../lib/stream');
+  app.get('/api/streams', (req, res) => {
+    res.json({ streams: streamManager.getAllStreams(), activeCount: streamManager.getActiveStreams().length });
+  });
+  app.post('/api/streams/stop-all', (req, res) => {
+    streamManager.stopAll();
+    res.json({ success: true });
+  });
+  const streamsRes = await fetch(`${baseUrl}/api/streams`);
+  assert.equal(streamsRes.status, 200);
+  const streamsData = await streamsRes.json();
+  assert.ok(Array.isArray(streamsData.streams));
+
+  const stopAllRes = await fetch(`${baseUrl}/api/streams/stop-all`, { method: 'POST' });
+  assert.equal(stopAllRes.status, 200);
+  const stopAllData = await stopAllRes.json();
+  assert.equal(stopAllData.success, true);
 });

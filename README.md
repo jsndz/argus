@@ -129,10 +129,16 @@ Viewers on the same Wi-Fi network can watch the stream using either link:
 | `/api/network/interfaces` | `GET` | List all detected IPv4 network interfaces with suitability scores. |
 | `/api/network/select` | `POST` | Dynamically rebind Argus, mDNS, and MediaMTX to a different NIC. |
 | `/api/mediamtx/restart` | `POST` | Restart and re-probe MediaMTX endpoints. |
-| `/api/qr` | `GET` | Returns a Base64 PNG QR code for one-scan viewer onboarding. |
-| `/upload` | `POST` | Upload video files (MP4, MKV, MOV, TS). |
-| `/start-stream` | `POST` | Launch FFmpeg looped RTSP stream to MediaMTX. |
-| `/stop` | `GET` | Stop active FFmpeg stream. |
+| `/api/qr` | `GET` | Returns a Base64 PNG QR code for one-scan viewer onboarding (supports `?stream=<id>`). |
+| `/upload` | `POST` | Upload multiple video files simultaneously (MP4, MKV, MOV, TS). |
+| `/api/media` | `GET` | List all cataloged video files with metadata (size, upload timestamp, name). |
+| `/api/media/:id` | `DELETE` | Delete a video file from storage and stop any stream broadcasting it. |
+| `/api/streams` | `GET` | List all active streaming channels. |
+| `/api/streams/start` | `POST` | Launch an FFmpeg loop stream on a channel (`{ fileId, streamId, name }`). |
+| `/api/streams/:id/stop` | `POST` | Stop a specific streaming channel. |
+| `/api/streams/stop-all` | `POST` | Stop all active streaming channels. |
+| `/start-stream` | `POST` | Backward-compatible: starts stream on `/live` channel. |
+| `/stop` | `GET` | Backward-compatible: stops all active streams. |
 
 ---
 

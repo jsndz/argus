@@ -7,8 +7,11 @@ const { networkManager } = require('./lib/network');
 const { mdnsManager } = require('./lib/mdns');
 const { mediaMtxManager } = require('./lib/mediamtx');
 const { firewallDetector } = require('./lib/firewall');
+const { mediaLibrary, UPLOADS_DIR } = require('./lib/media');
+const { streamManager } = require('./lib/stream');
 
 const QRCode = require('qrcode');
+const fs = require('fs');
 
 try {
   process.loadEnvFile();
@@ -21,34 +24,21 @@ try {
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api/whep', express.text({ type: ['application/sdp', 'text/plain', '*/*'] }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
-const fs = require('fs');
-
-function getLatestUpload() {
-  try {
-    const uploadDir = path.join(__dirname, 'uploads');
-    if (fs.existsSync(uploadDir)) {
-      const files = fs.readdirSync(uploadDir)
-        .filter((f) => !f.startsWith('.'))
-        .map((f) => ({
-          path: path.join('uploads', f),
-          time: fs.statSync(path.join(uploadDir, f)).mtime.getTime()
-        }))
-        .sort((a, b) => b.time - a.time);
-      if (files.length > 0) {
-        return files[0].path;
-      }
-    }
-  } catch (e) {}
-  return null;
-}
-
-let ffmpegProcess = null;
-let filePath = getLatestUpload();
-
-const upload = multer({ dest: 'uploads/' });
+// Configure Multer storage to preserve original filenames safely
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, UPLOADS_DIR);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const unique = `${Date.now()}_${base}${ext}`;
+    cb(null, unique);
+  }
+});
+const upload = multer({ storage });
 
 // Dedicated user / watch routes
 app.get('/watch', (req, res) => {
@@ -63,10 +53,19 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'watch.html'));
 });
 
-// HLS Stream Proxy (serves HLS stream directly via port 5000)
+// HLS Stream Proxy (serves all HLS streams dynamically via port 5000)
 app.use('/hls', async (req, res) => {
   try {
-    const upstreamUrl = 'http://127.0.0.1:8888/live' + req.url;
+    let subPath = req.url;
+
+    // If request is legacy root /index.m3u8, route to first active stream or 'live'
+    if (subPath === '/index.m3u8' || subPath.startsWith('/index.m3u8?')) {
+      const active = streamManager.getActiveStreams();
+      const targetChannel = active.length > 0 ? active[0].id : 'live';
+      subPath = `/${targetChannel}${subPath}`;
+    }
+
+    const upstreamUrl = `http://127.0.0.1:8888${subPath}`;
     const upstream = await fetch(upstreamUrl);
     if (!upstream.ok) {
       return res.status(upstream.status).send('Stream not available');
@@ -106,15 +105,21 @@ app.get('/api/status', async (req, res) => {
 
   const PORT = process.env.PORT || 5000;
   const firewall = firewallDetector.checkStatus(PORT);
+  const streams = streamManager.getAllStreams();
+  const activeStreams = streamManager.getActiveStreams();
+  const latestMedia = mediaLibrary.getLatest();
 
   res.json({
     network,
     mdns,
     mediamtx,
     firewall,
+    media: mediaLibrary.getAll(),
+    streams,
+    activeStreams,
     stream: {
-      isStreaming: !!ffmpegProcess,
-      filePath: filePath ? path.basename(filePath) : null
+      isStreaming: activeStreams.length > 0,
+      filePath: activeStreams.length > 0 ? activeStreams[0].fileName : (latestMedia ? latestMedia.originalName : null)
     }
   });
 });
@@ -176,71 +181,131 @@ app.post('/api/mediamtx/restart', async (req, res) => {
   }
 });
 
-// Video upload
-app.post('/upload', upload.single('video'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('No file uploaded.');
+// Multi-Video Upload (supports single or multiple files)
+app.post('/upload', upload.any(), (req, res) => {
+  const files = req.files || (req.file ? [req.file] : []);
+  if (!files || files.length === 0) {
+    return res.status(400).send('No video files uploaded.');
   }
 
-  filePath = req.file.path;
-  res.send('File uploaded successfully!');
+  const registered = mediaLibrary.registerFiles(files);
+  const count = registered.length;
+  res.json({
+    success: true,
+    message: `Successfully uploaded ${count} video file${count > 1 ? 's' : ''}!`,
+    files: registered
+  });
 });
 
-// Start RTSP stream to MediaMTX
+// Media Library API
+app.get('/api/media', (req, res) => {
+  res.json({ media: mediaLibrary.getAll() });
+});
+
+app.delete('/api/media/:id', (req, res) => {
+  const { id } = req.params;
+  const item = mediaLibrary.getById(id);
+  if (!item) {
+    return res.status(404).json({ error: 'Media file not found' });
+  }
+
+  // If any active stream is using this file, stop it
+  const activeStreams = streamManager.getActiveStreams();
+  for (const s of activeStreams) {
+    if (s.fileId === id || s.filePath === item.path) {
+      streamManager.stopStream(s.id);
+    }
+  }
+
+  const deleted = mediaLibrary.delete(id);
+  res.json({ success: deleted, id });
+});
+
+// Multi-Stream Management API
+app.get('/api/streams', (req, res) => {
+  res.json({
+    streams: streamManager.getAllStreams(),
+    activeCount: streamManager.getActiveStreams().length
+  });
+});
+
+app.post('/api/streams/start', (req, res) => {
+  const { fileId, streamId, name } = req.body;
+  let targetFile = null;
+
+  if (fileId) {
+    targetFile = mediaLibrary.getById(fileId);
+  }
+  if (!targetFile) {
+    targetFile = mediaLibrary.getLatest();
+  }
+
+  if (!targetFile) {
+    return res.status(400).json({ error: 'No video files available in media library. Upload a video first.' });
+  }
+
+  try {
+    const channelSlug = (streamId && streamId.trim()) ? streamId.trim() : streamManager.getNextChannelId();
+    const stream = streamManager.startStream({
+      id: channelSlug,
+      name: name || targetFile.originalName,
+      fileId: targetFile.id,
+      filePath: targetFile.path,
+      fileName: targetFile.originalName
+    });
+
+    const selectedIp = networkManager.getSelectedIp();
+    const hostname = mdnsManager.hostname || 'argus.local';
+
+    res.json({
+      success: true,
+      stream,
+      watchUrl: `http://${selectedIp}:5000/watch?stream=${stream.id}`,
+      mdnsWatchUrl: `http://${hostname}:5000/watch?stream=${stream.id}`,
+      hlsUrl: `http://${selectedIp}:5000/hls/${stream.id}/index.m3u8`
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/streams/:id/stop', (req, res) => {
+  const { id } = req.params;
+  const stopped = streamManager.stopStream(id);
+  res.json({ success: stopped, id });
+});
+
+app.post('/api/streams/stop-all', (req, res) => {
+  streamManager.stopAll();
+  res.json({ success: true, message: 'All streams stopped.' });
+});
+
+// Backward compatibility stream controls
 app.post('/start-stream', (req, res) => {
-  if (!filePath) {
+  const latest = mediaLibrary.getLatest();
+  if (!latest) {
     return res.status(400).send('No video uploaded.');
   }
 
-  if (ffmpegProcess) {
-    try {
-      ffmpegProcess.kill('SIGINT');
-    } catch (e) {
-      ffmpegProcess.kill('SIGKILL');
-    }
-    ffmpegProcess = null;
+  try {
+    const stream = streamManager.startStream({
+      id: 'live',
+      name: latest.originalName,
+      fileId: latest.id,
+      filePath: latest.path,
+      fileName: latest.originalName
+    });
+
+    const selectedIp = networkManager.getSelectedIp();
+    const hostname = mdnsManager.hostname || 'argus.local';
+    res.send(`Streaming started! View at http://${hostname}:5000/watch or http://${selectedIp}:5000/watch`);
+  } catch (err) {
+    res.status(500).send(`Failed to start stream: ${err.message}`);
   }
-
-  ffmpegProcess = spawn('ffmpeg', [
-    '-re',
-    '-stream_loop', '-1',
-    '-i', filePath,
-    '-c:v', 'libx264',
-    '-preset', 'veryfast',
-    '-tune', 'zerolatency',
-    '-c:a', 'libopus',
-    '-ar', '48000',
-    '-ac', '2',
-    '-rtsp_transport', 'tcp',
-    '-f', 'rtsp',
-    'rtsp://localhost:8554/live'
-  ]);
-
-  ffmpegProcess.stderr.on('data', (data) => {
-    // Keep internal stream logs
-  });
-
-  ffmpegProcess.on('exit', (code) => {
-    console.log(`[FFmpeg] Stream exited with code ${code}`);
-    ffmpegProcess = null;
-  });
-
-  const selectedIp = networkManager.getSelectedIp();
-  const hostname = mdnsManager.hostname || 'argus.local';
-
-  res.send(`Streaming started! View at http://${hostname}:5000/watch or http://${selectedIp}:5000/watch`);
 });
 
-// Stop stream
 app.get('/stop', (req, res) => {
-  if (ffmpegProcess) {
-    try {
-      ffmpegProcess.kill('SIGINT');
-    } catch (e) {
-      ffmpegProcess.kill('SIGKILL');
-    }
-    ffmpegProcess = null;
-  }
+  streamManager.stopAll();
   res.send('Streaming stopped!');
 });
 
@@ -312,18 +377,14 @@ async function startServer() {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\n[Argus] Shutting down gracefully...');
-  if (ffmpegProcess) {
-    try { ffmpegProcess.kill('SIGINT'); } catch (e) {}
-  }
+  streamManager.stopAll();
   await mdnsManager.stop();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('\n[Argus] Shutting down gracefully...');
-  if (ffmpegProcess) {
-    try { ffmpegProcess.kill('SIGINT'); } catch (e) {}
-  }
+  streamManager.stopAll();
   await mdnsManager.stop();
   process.exit(0);
 });

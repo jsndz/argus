@@ -3,6 +3,9 @@ let isStreamingActive = false;
 let pollingTimer = null;
 let currentViewerUrl = window.location.href;
 
+const urlParams = new URLSearchParams(window.location.search);
+let currentChannel = urlParams.get('stream') || null;
+
 const videoEl = document.getElementById('liveVideo');
 const offlineOverlay = document.getElementById('offlineOverlay');
 const statusBadge = document.getElementById('viewer-status-badge');
@@ -36,19 +39,119 @@ function copyToClipboard(text, label = 'Link') {
   });
 }
 
-// Start HLS Playback
+// Switch Active Channel
+function switchChannel(channelId) {
+  if (currentChannel === channelId && isStreamingActive) return;
+  currentChannel = channelId;
+
+  // Update browser address bar without reload
+  const newUrl = new URL(window.location.href);
+  newUrl.searchParams.set('stream', channelId);
+  window.history.replaceState({}, '', newUrl.toString());
+
+  isStreamingActive = false;
+  startHlsPlayback();
+  checkStreamStatus();
+}
+
+// Render Gallery / Grid of All Active Streams
+function updateStreamsGallery(activeStreams, host) {
+  const grid = document.getElementById('activeStreamsGrid');
+  const emptyCard = document.getElementById('noStreamsCard');
+  const countIndicator = document.getElementById('streams-count-indicator');
+  if (!grid) return;
+
+  const streams = (activeStreams || []).filter((s) => s.status === 'active');
+
+  if (countIndicator) {
+    if (streams.length > 0) {
+      countIndicator.className = 'badge badge-live';
+      countIndicator.innerHTML = `<span class="badge-dot pulse"></span> ${streams.length} Stream${streams.length !== 1 ? 's' : ''} Active`;
+    } else {
+      countIndicator.className = 'badge badge-idle';
+      countIndicator.innerHTML = '<span class="badge-dot"></span> 0 Streams Active';
+    }
+  }
+
+  if (streams.length === 0) {
+    grid.innerHTML = '';
+    if (emptyCard) emptyCard.style.display = 'block';
+    return;
+  }
+
+  if (emptyCard) emptyCard.style.display = 'none';
+  grid.innerHTML = '';
+
+  const activeChannelId = currentChannel || (streams[0] ? streams[0].id : 'live');
+
+  streams.forEach((s) => {
+    const isPlaying = s.id === activeChannelId;
+    const card = document.createElement('div');
+    card.className = 'card stream-card';
+    card.style.cssText = `
+      background: var(--card-bg);
+      border: 1px solid ${isPlaying ? 'var(--primary-color)' : 'var(--card-border)'};
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.2s ease;
+      box-shadow: ${isPlaying ? '0 0 16px rgba(59, 130, 246, 0.25)' : 'none'};
+    `;
+
+    const shareUrl = `http://${host}:5000/watch?stream=${encodeURIComponent(s.id)}`;
+    const startTimeStr = s.startedAt ? new Date(s.startedAt).toLocaleTimeString() : 'Live';
+
+    card.innerHTML = `
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
+          <div style="font-size: 11px; font-weight: 700; color: #60a5fa; background: rgba(59,130,246,0.15); padding: 3px 8px; border-radius: 4px; font-family: monospace;">
+            /${s.id}
+          </div>
+          <span class="badge ${isPlaying ? 'badge-live' : 'badge-idle'}" style="font-size: 11px; padding: 2px 8px;">
+            ${isPlaying ? '<span class="badge-dot pulse"></span> PLAYING NOW' : 'LIVE'}
+          </span>
+        </div>
+        <h3 style="font-size: 15px; font-weight: 600; color: #f3f4f6; margin-bottom: 4px; word-break: break-word;">
+          ${s.name || s.fileName || 'Live Stream'}
+        </h3>
+        <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+          <span>&#128197; ${startTimeStr}</span>
+          <span>&bull;</span>
+          <span>HLS</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+        <button class="btn ${isPlaying ? 'btn-secondary' : 'btn-primary'} btn-sm switch-channel-btn" data-channel="${s.id}" style="flex: 1;">
+          ${isPlaying ? '&#10003; Watching' : '&#9654; Watch Channel'}
+        </button>
+        <button class="btn btn-secondary btn-sm copy-stream-link-btn" data-url="${shareUrl}" title="Copy Direct Share Link">
+          &#128279; Share
+        </button>
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+// Start HLS Playback for currentChannel
 function startHlsPlayback() {
   if (hlsInstance) {
     hlsInstance.destroy();
     hlsInstance = null;
   }
 
-  reconnectText.innerText = 'Connecting to HLS live stream...';
+  const channelSlug = currentChannel || 'live';
+  reconnectText.innerText = `Connecting to channel /${channelSlug}...`;
 
-  // Primary URL is the proxied /hls/index.m3u8 on port 5000 (single port, no firewall issues)
-  const hlsUrl = '/hls/index.m3u8';
+  // Primary URL is the proxied /hls/:channel/index.m3u8 on port 5000
+  const hlsUrl = `/hls/${encodeURIComponent(channelSlug)}/index.m3u8`;
 
-  videoEl.muted = true; // Muted autoplay avoids all browser abort exceptions
+  videoEl.muted = true; // Muted autoplay avoids browser abort exceptions
 
   if (typeof Hls !== 'undefined' && Hls.isSupported()) {
     console.log('[HLS] Initializing HLS.js player for:', hlsUrl);
@@ -73,7 +176,8 @@ function startHlsPlayback() {
 
       offlineOverlay.style.display = 'none';
       statusBadge.className = 'badge badge-live';
-      statusBadge.innerHTML = '<span class="badge-dot pulse"></span> LIVE';
+      statusBadge.innerHTML = `<span class="badge-dot pulse"></span> LIVE (/${channelSlug})`;
+      isStreamingActive = true;
     });
 
     hlsInstance.on(Hls.Events.ERROR, (event, data) => {
@@ -96,7 +200,7 @@ function startHlsPlayback() {
     });
   } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
     // Native HLS for Safari / iOS
-    console.log('[HLS] Using native browser HLS playback');
+    console.log('[HLS] Using native browser HLS playback for:', hlsUrl);
     videoEl.src = hlsUrl;
     videoEl.addEventListener('loadedmetadata', () => {
       videoEl.play().then(() => {
@@ -106,7 +210,8 @@ function startHlsPlayback() {
       });
       offlineOverlay.style.display = 'none';
       statusBadge.className = 'badge badge-live';
-      statusBadge.innerHTML = '<span class="badge-dot pulse"></span> LIVE';
+      statusBadge.innerHTML = `<span class="badge-dot pulse"></span> LIVE (/${channelSlug})`;
+      isStreamingActive = true;
     });
     videoEl.addEventListener('error', () => {
       handleStreamDisconnected();
@@ -124,9 +229,38 @@ function handleStreamDisconnected() {
   videoEl.src = '';
   unmutePrompt.style.display = 'none';
   offlineOverlay.style.display = 'flex';
-  reconnectText.innerText = 'Broadcast offline. Waiting for live stream...';
+  const channelSlug = currentChannel || 'live';
+  reconnectText.innerText = `Channel /${channelSlug} is offline. Listening for broadcast...`;
   statusBadge.className = 'badge badge-idle';
   statusBadge.innerHTML = '<span class="badge-dot"></span> OFFLINE';
+  isStreamingActive = false;
+}
+
+// Render multi-channel selector buttons
+function updateChannelBar(activeStreams) {
+  const container = document.getElementById('channelBarContainer');
+  const btnBox = document.getElementById('channelButtons');
+  if (!container || !btnBox) return;
+
+  const streams = activeStreams || [];
+
+  if (streams.length <= 1) {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'block';
+  btnBox.innerHTML = '';
+
+  streams.forEach((s) => {
+    const btn = document.createElement('button');
+    const isCurrent = s.id === (currentChannel || 'live');
+    btn.className = isCurrent ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+    btn.style.fontSize = '12px';
+    btn.innerHTML = `<span class="badge-dot ${isCurrent ? 'pulse' : ''}"></span> /${s.id}: ${s.name}`;
+    btn.addEventListener('click', () => switchChannel(s.id));
+    btnBox.appendChild(btn);
+  });
 }
 
 // Poll server stream status
@@ -136,24 +270,35 @@ async function checkStreamStatus() {
     if (!res.ok) return;
     const data = await res.json();
 
-    const currentlyLive = data.stream && data.stream.isStreaming;
+    const activeStreams = data.activeStreams || [];
 
-    if (data.stream && data.stream.filePath) {
-      if (streamNameEl) streamNameEl.innerText = `Argus Stream: ${data.stream.filePath}`;
-    } else {
-      if (streamNameEl) streamNameEl.innerText = 'Argus Live Feed';
+    // If no channel was chosen yet, pick first active channel or 'live'
+    if (!currentChannel) {
+      if (activeStreams.length > 0) {
+        currentChannel = activeStreams[0].id;
+      } else {
+        currentChannel = 'live';
+      }
     }
 
-    if (currentlyLive) {
+    const host = (data.network && data.network.selected) ? data.network.selected.address : window.location.hostname;
+
+    updateChannelBar(activeStreams);
+    updateStreamsGallery(activeStreams, host);
+
+    // Find the currently selected stream
+    const activeStream = activeStreams.find((s) => s.id === currentChannel);
+
+    if (activeStream) {
+      if (streamNameEl) streamNameEl.innerText = `${activeStream.name} (/${activeStream.id})`;
       if (!isStreamingActive || !hlsInstance) {
-        console.log('[Viewer] Broadcaster is LIVE!');
-        isStreamingActive = true;
+        console.log(`[Viewer] Channel /${currentChannel} is LIVE!`);
         startHlsPlayback();
       }
     } else {
+      if (streamNameEl) streamNameEl.innerText = `Channel /${currentChannel}`;
       if (isStreamingActive) {
-        console.log('[Viewer] Broadcaster stopped stream.');
-        isStreamingActive = false;
+        console.log(`[Viewer] Channel /${currentChannel} stopped.`);
         handleStreamDisconnected();
       }
     }
@@ -168,7 +313,8 @@ async function loadQrCode() {
     const res = await fetch('/api/status');
     const data = await res.json();
     const host = (data.network && data.network.selected) ? data.network.selected.address : window.location.hostname;
-    currentViewerUrl = `http://${host}:5000/watch`;
+    const channelParam = currentChannel ? `?stream=${encodeURIComponent(currentChannel)}` : '';
+    currentViewerUrl = `http://${host}:5000/watch${channelParam}`;
 
     const qrRes = await fetch(`/api/qr?text=${encodeURIComponent(currentViewerUrl)}`);
     const qrData = await qrRes.json();
@@ -274,6 +420,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === modal) modal.style.display = 'none';
     });
   }
+
+  // Delegated click listeners for stream cards in gallery
+  document.addEventListener('click', (e) => {
+    const switchBtn = e.target.closest('.switch-channel-btn');
+    if (switchBtn) {
+      const channel = switchBtn.dataset.channel;
+      if (channel) {
+        switchChannel(channel);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast(`Switched to channel /${channel}`, 'info');
+      }
+      return;
+    }
+
+    const copyStreamBtn = e.target.closest('.copy-stream-link-btn');
+    if (copyStreamBtn) {
+      const url = copyStreamBtn.dataset.url;
+      if (url) copyToClipboard(url, 'Channel Stream Link');
+      return;
+    }
+  });
 });
 
 window.addEventListener('beforeunload', () => {

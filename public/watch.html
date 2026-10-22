@@ -227,6 +227,14 @@
 
     <!-- Main Player Arena -->
     <main class="viewer-container">
+      <!-- Multi-Channel Selector Bar -->
+      <div id="channelBarContainer" style="display: none; margin-bottom: -4px;">
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+          Live Channels:
+        </div>
+        <div id="channelButtons" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;"></div>
+      </div>
+
       <div class="player-card">
         <div class="video-wrapper">
           <!-- HTML5 Video Player for HLS Stream -->
@@ -281,8 +289,41 @@
               Copy Link
             </button>
           </div>
-        </div>
       </div>
+
+      <!-- Now Streaming Section: List of All Active Streams -->
+      <section class="streams-section" style="margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 700; color: #f3f4f6; display: flex; align-items: center; gap: 8px;">
+              <span>&#128250;</span> All Live Video Streams
+            </h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+              Click any stream below to switch channels instantly without reloading.
+            </p>
+          </div>
+          <div id="streams-count-indicator" class="badge badge-idle">
+            0 Streams Active
+          </div>
+        </div>
+
+        <!-- Grid of Stream Cards -->
+        <div id="activeStreamsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+          <!-- Populated dynamically by watch.js -->
+        </div>
+
+        <!-- Empty State when no streams are live -->
+        <div id="noStreamsCard" style="background: var(--card-bg); border: 1px dashed var(--card-border); border-radius: 12px; text-align: center; padding: 32px 20px; display: none;">
+          <div style="font-size: 32px; margin-bottom: 10px;">&#128257;</div>
+          <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">No Streams Currently Broadcasting</h3>
+          <p style="font-size: 13px; color: var(--text-muted); max-width: 440px; margin: 0 auto 16px auto;">
+            The broadcaster hasn't started streaming any videos yet. When a stream begins, it will appear here automatically.
+          </p>
+          <a href="/admin" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+            <span>&#9881;</span> Open Admin Room to Start a Stream
+          </a>
+        </div>
+      </section>
     </main>
 
     <!-- QR Code Share Modal -->
