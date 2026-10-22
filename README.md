@@ -4,6 +4,14 @@ Argus is an ultra-low latency, zero-configuration video distribution platform de
 
 ---
 
+## Technical Documentation
+
+Detailed deep-dive architectural documents and post-mortems of real-world problems:
+- [**Network Architecture & Troubleshooting Guide**](docs/network.md): Interface scoring, mDNS resolution, firewall detection, single-port reverse proxying, and mobile hotspot handling.
+- [**Video Pipeline & Transcoding Guide**](docs/video-pipeline.md): End-to-end pipeline, FFmpeg flags, universal mobile codecs (AAC/H.264), 100GB uploads, and mobile Safari playback post-mortems.
+
+---
+
 ## Architecture Overview
 
 ```

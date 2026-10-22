@@ -418,16 +418,152 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // File Upload Form
-  const uploadForm = document.getElementById('uploadForm');
-  const fileInput = document.getElementById('videoFile');
-  const dropzone = document.getElementById('dropzone');
-  const uploadBtn = document.getElementById('uploadBtn');
-  const fileDetails = document.getElementById('file-details');
+  // Multi-Video Upload Handler (Supports large files up to 100GB with real-time progress)
+  const dropzone = document.getElementById('upload-dropzone') || document.getElementById('dropzone') || document.getElementById('upload-form');
+  const fileInput = document.getElementById('video-file-input') || document.getElementById('videoFile');
+  const browseBtn = document.getElementById('browse-btn');
+  const startUploadBtn = document.getElementById('start-upload-btn') || document.getElementById('uploadBtn');
+  const summaryText = document.getElementById('selected-files-summary');
+  const progressContainer = document.getElementById('upload-progress-container');
+  const progressBar = document.getElementById('upload-progress-bar');
+  const statusText = document.getElementById('upload-status-text') || document.getElementById('file-details');
+  const speedText = document.getElementById('upload-speed-text');
 
-  if (dropzone && fileInput) {
-    dropzone.addEventListener('click', () => fileInput.click());
+  let pendingFiles = [];
 
+  function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+  }
+
+  function handleFilesSelected(files) {
+    if (!files || files.length === 0) return;
+    pendingFiles = Array.from(files);
+
+    const totalBytes = pendingFiles.reduce((sum, f) => sum + f.size, 0);
+    const formattedTotal = formatBytes(totalBytes);
+
+    if (summaryText) {
+      if (pendingFiles.length === 1) {
+        summaryText.innerText = `Selected: ${pendingFiles[0].name} (${formattedTotal})`;
+      } else {
+        summaryText.innerText = `Selected ${pendingFiles.length} files (${formattedTotal} total)`;
+      }
+      summaryText.style.display = 'block';
+    }
+
+    if (startUploadBtn) {
+      startUploadBtn.style.display = 'inline-flex';
+      startUploadBtn.innerText = `⬆ Upload ${pendingFiles.length} File${pendingFiles.length > 1 ? 's' : ''} (${formattedTotal})`;
+    }
+
+    // Auto-trigger upload immediately for instant responsiveness!
+    startUpload();
+  }
+
+  function startUpload() {
+    if (!pendingFiles || pendingFiles.length === 0) {
+      showToast('Please select a video file first', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    pendingFiles.forEach((file) => {
+      formData.append('videos', file);
+    });
+
+    if (progressContainer) progressContainer.style.display = 'block';
+    if (progressBar) progressBar.style.width = '0%';
+    if (statusText) statusText.innerText = 'Starting upload...';
+    if (startUploadBtn) startUploadBtn.disabled = true;
+    if (browseBtn) browseBtn.disabled = true;
+
+    showToast(`Uploading ${pendingFiles.length} video file(s)...`, 'info');
+
+    const xhr = new XMLHttpRequest();
+    const startTime = Date.now();
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.min(100, Math.round((e.loaded / e.total) * 100));
+        const uploadedStr = formatBytes(e.loaded);
+        const totalStr = formatBytes(e.total);
+        const elapsedSec = (Date.now() - startTime) / 1000;
+        const bytesPerSec = elapsedSec > 0 ? e.loaded / elapsedSec : 0;
+        const speedStr = formatBytes(bytesPerSec) + '/s';
+
+        if (progressBar) progressBar.style.width = `${percent}%`;
+        if (statusText) statusText.innerText = `Uploading: ${percent}% (${uploadedStr} / ${totalStr})`;
+        if (speedText) speedText.innerText = speedStr;
+      }
+    };
+
+    xhr.onload = () => {
+      if (startUploadBtn) {
+        startUploadBtn.disabled = false;
+        startUploadBtn.style.display = 'none';
+      }
+      if (browseBtn) browseBtn.disabled = false;
+
+      let resData = {};
+      try {
+        resData = JSON.parse(xhr.responseText);
+      } catch (err) {}
+
+      if (xhr.status >= 200 && xhr.status < 300 && resData.success) {
+        showToast(resData.message || 'Video(s) uploaded successfully!', 'success');
+        if (progressBar) progressBar.style.width = '100%';
+        if (statusText) statusText.innerText = `Upload complete! (${formatBytes(pendingFiles.reduce((s, f) => s + f.size, 0))})`;
+        if (speedText) speedText.innerText = 'Done';
+        if (summaryText) summaryText.style.display = 'none';
+        pendingFiles = [];
+        if (fileInput) fileInput.value = '';
+
+        setTimeout(() => {
+          if (progressContainer) progressContainer.style.display = 'none';
+        }, 3500);
+
+        refreshStatus();
+      } else {
+        const errorMsg = resData.error || (xhr.status === 413 ? 'File exceeds maximum limit (100 GB)' : `Server responded with HTTP ${xhr.status}`);
+        showToast(`Upload failed: ${errorMsg}`, 'error');
+        if (statusText) statusText.innerText = `Upload failed: ${errorMsg}`;
+      }
+    };
+
+    xhr.onerror = () => {
+      if (startUploadBtn) startUploadBtn.disabled = false;
+      if (browseBtn) browseBtn.disabled = false;
+      showToast('Network error during upload. Please check connection.', 'error');
+      if (statusText) statusText.innerText = 'Upload failed due to network error.';
+    };
+
+    xhr.open('POST', '/upload', true);
+    xhr.send(formData);
+  }
+
+  if (browseBtn && fileInput) {
+    browseBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fileInput.click();
+    });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', () => {
+      handleFilesSelected(fileInput.files);
+    });
+  }
+
+  if (startUploadBtn) {
+    startUploadBtn.addEventListener('click', startUpload);
+  }
+
+  if (dropzone) {
     dropzone.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropzone.classList.add('dragover');
@@ -440,62 +576,8 @@ document.addEventListener('DOMContentLoaded', () => {
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropzone.classList.remove('dragover');
-      if (e.dataTransfer.files.length > 0) {
-        fileInput.files = e.dataTransfer.files;
-        updateFileInfo();
-      }
-    });
-
-    fileInput.addEventListener('change', updateFileInfo);
-
-    function updateFileInfo() {
-      if (fileInput.files.length > 0) {
-        const totalMb = Array.from(fileInput.files).reduce((acc, f) => acc + f.size, 0) / (1024 * 1024);
-        if (fileInput.files.length === 1) {
-          fileDetails.innerText = `Selected: ${fileInput.files[0].name} (${totalMb.toFixed(2)} MB)`;
-        } else {
-          fileDetails.innerText = `Selected: ${fileInput.files.length} video files (${totalMb.toFixed(2)} MB total)`;
-        }
-        fileDetails.style.display = 'block';
-      } else {
-        fileDetails.style.display = 'none';
-      }
-    }
-  }
-
-  if (uploadForm) {
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!fileInput.files.length) {
-        showToast('Please select at least one video file', 'error');
-        return;
-      }
-
-      const formData = new FormData(uploadForm);
-      uploadBtn.disabled = true;
-      uploadBtn.innerText = 'Uploading...';
-      showToast('Uploading video file(s)...', 'info');
-
-      try {
-        const res = await fetch('/upload', {
-          method: 'POST',
-          body: formData
-        });
-
-        const data = await res.json().catch(() => ({}));
-        if (res.ok) {
-          showToast(data.message || 'Video(s) uploaded successfully!', 'success');
-          fileInput.value = '';
-          fileDetails.style.display = 'none';
-          refreshStatus();
-        } else {
-          showToast(`Upload failed: ${data.error || 'Server error'}`, 'error');
-        }
-      } catch (err) {
-        showToast(`Upload error: ${err.message}`, 'error');
-      } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.innerText = 'Upload Video Files';
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFilesSelected(e.dataTransfer.files);
       }
     });
   }

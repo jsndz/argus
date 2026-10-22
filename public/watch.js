@@ -1,5 +1,7 @@
 let hlsInstance = null;
 let isStreamingActive = false;
+let currentLoadedUrl = null;
+let isConnecting = false;
 let pollingTimer = null;
 let currentViewerUrl = window.location.href;
 
@@ -49,7 +51,9 @@ function switchChannel(channelId) {
   newUrl.searchParams.set('stream', channelId);
   window.history.replaceState({}, '', newUrl.toString());
 
+  currentLoadedUrl = null;
   isStreamingActive = false;
+  isConnecting = false;
   startHlsPlayback();
   checkStreamStatus();
 }
@@ -126,16 +130,31 @@ function updateStreamsGallery(activeStreams, host) {
 
 // Start HLS Playback for currentChannel
 function startHlsPlayback() {
+  const channelSlug = currentChannel || 'live';
+  const hlsUrl = `/hls/${encodeURIComponent(channelSlug)}/index.m3u8`;
+
+  // Guard: If we are already playing or connecting to this exact HLS URL, DO NOT RELOAD!
+  if (currentLoadedUrl === hlsUrl && (isStreamingActive || isConnecting)) {
+    return;
+  }
+
+  currentLoadedUrl = hlsUrl;
+  isConnecting = true;
+  reconnectText.innerText = `Connecting to channel /${channelSlug}...`;
+
+  // Safety timeout in case load stalls
+  clearTimeout(startHlsPlayback._connectTimeout);
+  startHlsPlayback._connectTimeout = setTimeout(() => {
+    if (isConnecting && !isStreamingActive) {
+      console.warn('[HLS] Connection attempt timed out, allowing retry.');
+      isConnecting = false;
+    }
+  }, 8000);
+
   if (hlsInstance) {
     hlsInstance.destroy();
     hlsInstance = null;
   }
-
-  const channelSlug = currentChannel || 'live';
-  reconnectText.innerText = `Connecting to channel /${channelSlug}...`;
-
-  // Primary URL is the proxied /hls/:channel/index.m3u8 on port 5000
-  const hlsUrl = `/hls/${encodeURIComponent(channelSlug)}/index.m3u8`;
 
   videoEl.muted = true; // Muted autoplay avoids browser abort exceptions
 
@@ -143,7 +162,8 @@ function startHlsPlayback() {
     console.log('[HLS] Initializing HLS.js player for:', hlsUrl);
     hlsInstance = new Hls({
       liveSyncDurationCount: 3,
-      liveMaxLatencyDurationCount: 5,
+      liveMaxLatencyDurationCount: 6,
+      maxBufferLength: 10,
       enableWorker: true,
       lowLatencyMode: true
     });
@@ -164,6 +184,7 @@ function startHlsPlayback() {
       statusBadge.className = 'badge badge-live';
       statusBadge.innerHTML = `<span class="badge-dot pulse"></span> LIVE (/${channelSlug})`;
       isStreamingActive = true;
+      isConnecting = false;
     });
 
     hlsInstance.on(Hls.Events.ERROR, (event, data) => {
@@ -187,20 +208,25 @@ function startHlsPlayback() {
   } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
     // Native HLS for Safari / iOS
     console.log('[HLS] Using native browser HLS playback for:', hlsUrl);
-    videoEl.src = hlsUrl;
-    videoEl.addEventListener('loadedmetadata', () => {
-      videoEl.play().then(() => {
-        unmutePrompt.style.display = 'inline-flex';
-      }).catch(() => {
-        unmutePrompt.style.display = 'inline-flex';
-      });
+    if (!videoEl.src || !videoEl.src.endsWith(hlsUrl)) {
+      videoEl.src = hlsUrl;
+      videoEl.load();
+    }
+    videoEl.play().then(() => {
       offlineOverlay.style.display = 'none';
       statusBadge.className = 'badge badge-live';
       statusBadge.innerHTML = `<span class="badge-dot pulse"></span> LIVE (/${channelSlug})`;
       isStreamingActive = true;
-    });
-    videoEl.addEventListener('error', () => {
-      handleStreamDisconnected();
+      isConnecting = false;
+      unmutePrompt.style.display = 'inline-flex';
+    }).catch((err) => {
+      console.log('[HLS] Autoplay waiting for user gesture:', err.message);
+      offlineOverlay.style.display = 'none';
+      statusBadge.className = 'badge badge-live';
+      statusBadge.innerHTML = `<span class="badge-dot pulse"></span> LIVE (/${channelSlug})`;
+      isStreamingActive = true;
+      isConnecting = false;
+      unmutePrompt.style.display = 'inline-flex';
     });
   } else {
     showToast('Your browser does not support HLS playback', 'error');
@@ -212,6 +238,7 @@ function handleStreamDisconnected() {
     hlsInstance.destroy();
     hlsInstance = null;
   }
+  currentLoadedUrl = null;
   videoEl.src = '';
   unmutePrompt.style.display = 'none';
   offlineOverlay.style.display = 'flex';
@@ -220,6 +247,7 @@ function handleStreamDisconnected() {
   statusBadge.className = 'badge badge-idle';
   statusBadge.innerHTML = '<span class="badge-dot"></span> OFFLINE';
   isStreamingActive = false;
+  isConnecting = false;
 }
 
 // Render multi-channel selector buttons
@@ -277,13 +305,13 @@ async function checkStreamStatus() {
 
     if (activeStream) {
       if (streamNameEl) streamNameEl.innerText = `${activeStream.name} (/${activeStream.id})`;
-      if (!isStreamingActive || !hlsInstance) {
-        console.log(`[Viewer] Channel /${currentChannel} is LIVE!`);
+      if (!isStreamingActive && !isConnecting) {
+        console.log(`[Viewer] Channel /${currentChannel} is LIVE! Starting playback.`);
         startHlsPlayback();
       }
     } else {
       if (streamNameEl) streamNameEl.innerText = `Channel /${currentChannel}`;
-      if (isStreamingActive) {
+      if (isStreamingActive || currentLoadedUrl) {
         console.log(`[Viewer] Channel /${currentChannel} stopped.`);
         handleStreamDisconnected();
       }
@@ -336,6 +364,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (unmutePrompt) unmutePrompt.style.display = 'none';
         showToast('Audio unmuted', 'info');
       }
+    });
+
+    // Handle native playback events (critical for mobile iOS Safari / WebKit)
+    videoEl.addEventListener('playing', () => {
+      offlineOverlay.style.display = 'none';
+      const channelSlug = currentChannel || 'live';
+      statusBadge.className = 'badge badge-live';
+      statusBadge.innerHTML = `<span class="badge-dot pulse"></span> LIVE (/${channelSlug})`;
+      isStreamingActive = true;
+      isConnecting = false;
+    });
+
+    videoEl.addEventListener('error', () => {
+      console.warn('[Video] Native media error:', videoEl.error);
     });
   }
 

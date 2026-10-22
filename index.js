@@ -22,8 +22,8 @@ try {
 }
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // Configure Multer storage to preserve original filenames safely
@@ -38,7 +38,15 @@ const storage = multer.diskStorage({
     cb(null, unique);
   }
 });
-const upload = multer({ storage });
+
+// Configure Multer with 100 GB limit to support large 4K/1080p video files
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 100 * 1024 * 1024 * 1024, // 100 Gigabytes per file
+    files: 50 // Up to 50 simultaneous files
+  }
+});
 
 // Dedicated user / watch routes
 app.get('/watch', (req, res) => {
@@ -181,19 +189,35 @@ app.post('/api/mediamtx/restart', async (req, res) => {
   }
 });
 
-// Multi-Video Upload (supports single or multiple files)
-app.post('/upload', upload.any(), (req, res) => {
-  const files = req.files || (req.file ? [req.file] : []);
-  if (!files || files.length === 0) {
-    return res.status(400).send('No video files uploaded.');
-  }
+// Multi-Video Upload (supports single or multiple files with unlimited size up to 100GB)
+app.post('/upload', (req, res) => {
+  // Prevent socket timeout during large video file transfers
+  if (req.setTimeout) req.setTimeout(0);
 
-  const registered = mediaLibrary.registerFiles(files);
-  const count = registered.length;
-  res.json({
-    success: true,
-    message: `Successfully uploaded ${count} video file${count > 1 ? 's' : ''}!`,
-    files: registered
+  upload.any()(req, res, (err) => {
+    if (err) {
+      console.error('[Upload Error]', err);
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(413).json({ error: 'File size exceeds maximum allowable limit (100 GB).' });
+        }
+        return res.status(400).json({ error: `Upload error: ${err.message}` });
+      }
+      return res.status(500).json({ error: `Server error during upload: ${err.message}` });
+    }
+
+    const files = req.files || (req.file ? [req.file] : []);
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: 'No video files were received.' });
+    }
+
+    const registered = mediaLibrary.registerFiles(files);
+    const count = registered.length;
+    res.json({
+      success: true,
+      message: `Successfully uploaded ${count} video file${count > 1 ? 's' : ''}!`,
+      files: registered
+    });
   });
 });
 

@@ -260,24 +260,31 @@
 
               <div class="ribbon-card-body ribbon-card-body-sage">
                 <!-- Drag and drop upload box -->
-                <form id="upload-form" class="upload-dropzone" style="margin-bottom: 14px;">
-                  <div style="font-size: 24px; margin-bottom: 4px;">&#128229;</div>
-                  <div style="font-family: var(--font-heading); font-size: 13px; font-weight: bold; text-transform: uppercase;">
-                    Drag & Drop Multiple Video Files Here
+                <div id="upload-dropzone" class="upload-dropzone" style="margin-bottom: 14px;">
+                  <div style="font-size: 28px; margin-bottom: 6px;">&#128229;</div>
+                  <div style="font-family: var(--font-heading); font-size: 13px; font-weight: 700; text-transform: uppercase;">
+                    Drag & Drop Video Files Here
                   </div>
-                  <div style="font-size: 12px; margin: 4px 0 8px 0;">
-                    Supports MP4, MKV, MOV, TS (Unlimited concurrent uploads)
+                  <div style="font-size: 12px; color: var(--color-muted); margin: 4px 0 10px 0;">
+                    Supports MP4, MKV, MOV, TS, WebM, AVI (No size limit &bull; up to 100 GB)
                   </div>
-                  <input type="file" id="video-file-input" name="videos" multiple accept="video/*,.mkv,.mp4,.mov,.ts" style="display: none;" />
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('video-file-input').click();">
-                    Browse Computer...
-                  </button>
-                </form>
+                  <input type="file" id="video-file-input" name="videos" multiple accept="video/*,.mkv,.mp4,.mov,.ts,.webm,.avi" style="display: none;" />
+                  <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                    <button type="button" id="browse-btn" class="btn btn-secondary btn-sm">
+                      Browse Computer...
+                    </button>
+                    <button type="button" id="start-upload-btn" class="btn btn-primary btn-sm" style="display: none;">
+                      &#128228; Upload Selected Files
+                    </button>
+                  </div>
+                  <div id="selected-files-summary" style="display: none; margin-top: 10px; font-size: 12px; font-weight: bold; color: var(--color-primary);"></div>
+                </div>
 
-                <!-- Retro Progress Bar -->
+                <!-- Clean Progress Bar -->
                 <div id="upload-progress-container" style="display: none; margin-bottom: 14px;">
-                  <div style="display: flex; justify-content: space-between; font-family: var(--font-heading); font-size: 11px; font-weight: bold;">
-                    <span id="upload-status-text">Uploading videos...</span>
+                  <div style="display: flex; justify-content: space-between; font-family: var(--font-heading); font-size: 11px; font-weight: bold; margin-bottom: 4px;">
+                    <span id="upload-status-text">Uploading: 0%</span>
+                    <span id="upload-speed-text"></span>
                   </div>
                   <div class="retro-progress-box">
                     <div id="upload-progress-bar" class="retro-progress-bar"></div>
