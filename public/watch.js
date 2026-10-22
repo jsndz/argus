@@ -87,46 +87,32 @@ function updateStreamsGallery(activeStreams, host) {
   streams.forEach((s) => {
     const isPlaying = s.id === activeChannelId;
     const card = document.createElement('div');
-    card.className = 'card stream-card';
-    card.style.cssText = `
-      background: var(--card-bg);
-      border: 1px solid ${isPlaying ? 'var(--primary-color)' : 'var(--card-border)'};
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 12px;
-      transition: all 0.2s ease;
-      box-shadow: ${isPlaying ? '0 0 16px rgba(59, 130, 246, 0.25)' : 'none'};
-    `;
+    card.className = `stream-card-1996 ${isPlaying ? 'active-playing' : ''}`;
 
     const shareUrl = `http://${host}:5000/watch?stream=${encodeURIComponent(s.id)}`;
     const startTimeStr = s.startedAt ? new Date(s.startedAt).toLocaleTimeString() : 'Live';
 
     card.innerHTML = `
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
-          <div style="font-size: 11px; font-weight: 700; color: #60a5fa; background: rgba(59,130,246,0.15); padding: 3px 8px; border-radius: 4px; font-family: monospace;">
-            /${s.id}
-          </div>
-          <span class="badge ${isPlaying ? 'badge-live' : 'badge-idle'}" style="font-size: 11px; padding: 2px 8px;">
-            ${isPlaying ? '<span class="badge-dot pulse"></span> PLAYING NOW' : 'LIVE'}
-          </span>
+      <div class="stream-card-header">
+        <span style="font-family: var(--font-mono); font-weight: bold; font-size: 11px;">/${s.id}</span>
+        <span class="badge ${isPlaying ? 'badge-live' : 'badge-idle'}" style="font-size: 10px; padding: 2px 6px;">
+          ${isPlaying ? '<span class="badge-dot pulse"></span> ON AIR (PLAYING)' : 'TRANSMITTING'}
+        </span>
+      </div>
+
+      <div class="stream-card-body">
+        <div class="stream-card-title">${s.name || s.fileName || 'Live Channel Feed'}</div>
+        <div style="font-family: var(--font-body); font-size: 13px; color: #444444; margin-top: 4px;">
+          Transmitting video: <em>${s.fileName || 'Video File'}</em>
         </div>
-        <h3 style="font-size: 15px; font-weight: 600; color: #f3f4f6; margin-bottom: 4px; word-break: break-word;">
-          ${s.name || s.fileName || 'Live Stream'}
-        </h3>
-        <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
-          <span>&#128197; ${startTimeStr}</span>
-          <span>&bull;</span>
-          <span>HLS</span>
+        <div style="font-family: var(--font-body); font-size: 12px; color: #666666; margin-top: 4px;">
+          Broadcast started at ${startTimeStr} &bull; 1080p HLS
         </div>
       </div>
 
-      <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+      <div class="stream-card-actions">
         <button class="btn ${isPlaying ? 'btn-secondary' : 'btn-primary'} btn-sm switch-channel-btn" data-channel="${s.id}" style="flex: 1;">
-          ${isPlaying ? '&#10003; Watching' : '&#9654; Watch Channel'}
+          ${isPlaying ? '&#10003; Watching Now' : '&#9654; Watch Channel'}
         </button>
         <button class="btn btn-secondary btn-sm copy-stream-link-btn" data-url="${shareUrl}" title="Copy Direct Share Link">
           &#128279; Share

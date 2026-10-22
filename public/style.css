@@ -1,413 +1,1109 @@
+/* ==========================================================================
+   DELL 1996 DESIGN SYSTEM - ARGUS VIDEO STREAMING PLATFORM
+   Based on DESIGN-dell-1996.md & 12 Principles of Animation
+   ========================================================================== */
+
 :root {
-  --bg-primary: #0b0f19;
-  --bg-secondary: #111827;
-  --card-bg: #1f2937;
-  --card-border: #374151;
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --accent-blue: #3b82f6;
-  --accent-blue-hover: #2563eb;
-  --accent-green: #10b981;
-  --accent-green-hover: #059669;
-  --accent-red: #ef4444;
-  --accent-red-hover: #dc2626;
-  --accent-amber: #f59e0b;
-  --badge-bg: #374151;
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Colors */
+  --color-primary: #e91d2a;         /* Dell Red (strictly for CTA & Hotline) */
+  --color-on-primary: #ffffff;
+  --color-canvas: #ffffff;          /* Pure White Page Canvas */
+  --color-surface: #ffffff;
+  --color-frame-ink: #000000;       /* Pure Black Frame & Hairlines */
+  --color-ink: #000000;             /* Pure Black Text */
+  --color-yellow-sticker: #fcc20f;  /* 1996 Sticker & "NEW!" Burst Yellow */
+  --color-purple-stripe: #6a26a4;   /* Sticker Accent Purple */
+  --color-link: #0000ee;            /* Classic Netscape 3.x Link Blue */
+  --color-link-visited: #551a8b;
+
+  /* Dell 1996 Ribbon-Card Tint Family */
+  --tint-olive: #8e8a25;            /* Eyebrow blocks & headers */
+  --tint-sage: #b3bd95;             /* Media Library & Uploads */
+  --tint-salmon: #d77a7a;           /* Active Streams */
+  --tint-peach: #e6915d;            /* Stream Channel Launcher */
+  --tint-lime: #c0d4a7;             /* Network Discovery & Interfaces */
+  --tint-sky: #9ab6c8;              /* Viewer & Channel Gallery */
+  --tint-steel: #a5b8c0;            /* MediaMTX Telemetry */
+  --tint-periwinkle: #8c9ae0;       /* Host Firewall & Security */
+
+  /* Win95 / Retro Hardware Bevel Palette */
+  --bevel-light: #ffffff;
+  --bevel-mid: #dfdfdf;
+  --bevel-dark: #808080;
+  --bevel-black: #000000;
+  --crt-bezel: #2b2b2b;
+  --crt-screen: #000000;
+
+  /* Typography Stack */
+  --font-display: "Arial Black", Gadget, "Arial Bold", sans-serif;
+  --font-heading: Helvetica, Arial, sans-serif;
+  --font-body: "Times New Roman", Times, Georgia, serif;
+  --font-mono: "Courier New", Courier, monospace;
+
+  /* Spacing */
+  --space-xxs: 2px;
+  --space-xs: 4px;
+  --space-s: 6px;
+  --space-sm: 8px;
+  --space-m: 10px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-xxl: 24px;
+  --space-section: 32px;
+
+  /* Animation Tokens (12 Principles of Animation: Under 300ms for user feedback) */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --trans-fast: 120ms var(--ease-out);
+  --trans-normal: 220ms var(--ease-out);
 }
 
+/* Base Reset & Box Sizing */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  border-radius: 0 !important; /* Strict Dell 1996: zero rounded corners except seals */
 }
 
-body {
-  font-family: var(--font-family);
-  background-color: var(--bg-primary);
-  color: var(--text-main);
-  line-height: 1.5;
+html, body {
+  background-color: var(--color-frame-ink); /* Browser gutter is dark */
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: auto;
+  image-rendering: pixelated;
+}
+
+/* The Literal Page Frame (The iconic Dell 1996 outer black border) */
+.page-outer-wrapper {
+  max-width: 1080px;
+  margin: 0 auto;
+  background-color: var(--color-frame-ink);
+  padding: 8px; /* 8px literal black border */
   min-height: 100vh;
 }
 
-/* Header */
-.header {
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--card-border);
-  padding: 16px 24px;
+.page-inner-canvas {
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-frame-ink);
+  padding-bottom: 24px;
+  box-shadow: 0 0 0 1px var(--color-frame-ink);
+}
+
+/* Top Banner */
+.top-banner {
+  background-color: var(--color-frame-ink);
+  color: var(--color-canvas);
+  padding: 10px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
+  border-bottom: 2px solid var(--color-frame-ink);
 }
 
-.brand {
+.brand-block {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.brand-icon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, var(--accent-blue), #8b5cf6);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+.brand-logo-badge {
+  background-color: var(--color-primary);
+  color: var(--color-canvas);
+  font-family: var(--font-display);
   font-size: 18px;
+  font-weight: 900;
+  padding: 3px 8px;
+  border: 1px solid #ffffff;
+  letter-spacing: -0.5px;
+  display: inline-block;
+  box-shadow: 2px 2px 0 #ffffff;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .brand-title {
-  font-size: 20px;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.brand-tagline {
+  font-family: var(--font-heading);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  color: #cccccc;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.brand-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.header-badges {
+.top-banner-right {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.badge {
+/* Red Phone/Hotline Callout */
+.phone-callout {
+  background-color: var(--color-frame-ink);
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  border: 1px dashed var(--color-primary);
+  padding: 4px 10px;
+  text-decoration: none;
+  letter-spacing: 0.5px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 9999px;
+}
+
+.phone-callout strong {
+  color: #ffffff;
+}
+
+/* BUY A DELL / WATCH A STREAM Sticker Tab */
+.sticker-tab {
+  background-color: var(--color-yellow-sticker);
+  color: var(--color-ink);
+  font-family: var(--font-heading);
   font-size: 12px;
-  font-weight: 600;
-  background-color: var(--badge-bg);
-  color: var(--text-main);
-}
-
-.badge-live {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-}
-
-.badge-idle {
-  background-color: rgba(156, 163, 175, 0.2);
-  color: #9ca3af;
-  border: 1px solid rgba(156, 163, 175, 0.4);
-}
-
-.badge-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: currentColor;
-}
-
-.pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.lan-link-badge {
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  font-weight: 900;
+  padding: 5px 12px;
+  border-top: 2px solid var(--bevel-light);
+  border-left: 2px solid var(--bevel-light);
+  border-right: 2px solid var(--bevel-black);
+  border-bottom: 2px solid var(--bevel-black);
   text-decoration: none;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  transition: transform var(--trans-fast);
 }
 
-/* Container */
-.container {
-  max-width: 1100px;
-  margin: 30px auto;
-  padding: 0 20px;
+.sticker-tab:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.sticker-tab:active {
+  border-top: 2px solid var(--bevel-black);
+  border-left: 2px solid var(--bevel-black);
+  border-right: 2px solid var(--bevel-light);
+  border-bottom: 2px solid var(--bevel-light);
+  transform: translate(1px, 1px);
+}
+
+.sticker-tab .purple-stripe {
+  background-color: var(--color-purple-stripe);
+  color: #ffffff;
+  padding: 1px 4px;
+  font-size: 10px;
+  margin: 0 2px;
+}
+
+/* 1996 Marquee Ticker Bar */
+.retro-ticker-container {
+  background-color: var(--color-frame-ink);
+  color: #39ff14; /* Vintage terminal phosphor green */
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--color-frame-ink);
+  overflow: hidden;
+  white-space: nowrap;
   display: flex;
-  flex-direction: column;
-  gap: 24px;
+  align-items: center;
 }
 
-/* Cards */
-.card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+.retro-ticker-label {
+  background-color: #39ff14;
+  color: #000000;
+  padding: 1px 6px;
+  font-family: var(--font-heading);
+  font-size: 10px;
+  font-weight: 900;
+  margin-right: 12px;
+  flex-shrink: 0;
+  text-transform: uppercase;
 }
 
-.card-header {
+.retro-ticker-track {
+  display: inline-block;
+  padding-left: 100%;
+  animation: retroMarquee 28s linear infinite;
+}
+
+.retro-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes retroMarquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* Sub-header Navigation / Quick Bar */
+.sub-nav-bar {
+  background-color: #eeeeee;
+  border-bottom: 1px solid var(--color-frame-ink);
+  padding: 6px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--card-border);
-}
-
-.card-title {
-  font-size: 17px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-/* Grid layout */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+.sub-nav-links {
+  display: flex;
+  gap: 16px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-@media (max-width: 768px) {
-  .grid-2 {
+.sub-nav-links a {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.sub-nav-links a:hover {
+  color: var(--color-primary);
+}
+
+/* Eyebrow Title Blocks (Arial Black 900) */
+.section-eyebrow {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-frame-ink);
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.section-eyebrow h1,
+.section-eyebrow h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--color-ink);
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.section-eyebrow-olive {
+  background-color: var(--tint-olive);
+  color: #ffffff;
+}
+
+.section-eyebrow-olive h1,
+.section-eyebrow-olive h2 {
+  color: #ffffff;
+}
+
+.section-eyebrow-salmon {
+  background-color: var(--tint-salmon);
+  color: var(--color-ink);
+}
+
+.section-eyebrow-sky {
+  background-color: var(--tint-sky);
+  color: var(--color-ink);
+}
+
+/* Layout Grid: 28% left rail / 72% right column */
+.content-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+  padding: 16px;
+}
+
+@media (max-width: 820px) {
+  .content-grid {
     grid-template-columns: 1fr;
   }
 }
 
-/* Forms and Inputs */
-.form-group {
-  margin-bottom: 16px;
+/* Left Rail & Right Column */
+.left-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-bottom: 6px;
+.main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-select, input[type="text"] {
-  width: 100%;
-  padding: 10px 14px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
-  color: var(--text-main);
+/* Dell-Red Primary CTA Panel */
+.cta-block-red {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  border: 1px solid var(--color-frame-ink);
+  padding: 16px;
+  font-family: var(--font-body);
   font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
+  line-height: 1.45;
+  box-shadow: 2px 2px 0 var(--color-frame-ink);
 }
 
-select:focus, input[type="text"]:focus {
-  border-color: var(--accent-blue);
+.cta-block-red h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: #ffff00; /* 1996 accent yellow on red */
+  line-height: 1.1;
+}
+
+.cta-block-red p {
+  margin-bottom: 10px;
+}
+
+.cta-block-red a {
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Ribbon Cards (Signature Dell 1996 Component) */
+.ribbon-card {
+  border: 1px solid var(--color-frame-ink);
+  background-color: var(--color-canvas);
+  box-shadow: 2px 2px 0 var(--color-frame-ink);
+  transition: transform var(--trans-normal);
+  position: relative;
+}
+
+.ribbon-card-title {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-frame-ink);
+  padding: 6px 12px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  letter-spacing: 0.5px;
+}
+
+.ribbon-card-body {
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  border-top: none;
+}
+
+/* Tint Variations */
+.ribbon-card-body-sage { background-color: var(--tint-sage); }
+.ribbon-card-body-salmon { background-color: var(--tint-salmon); }
+.ribbon-card-body-peach { background-color: var(--tint-peach); }
+.ribbon-card-body-lime { background-color: var(--tint-lime); }
+.ribbon-card-body-sky { background-color: var(--tint-sky); }
+.ribbon-card-body-steel { background-color: var(--tint-steel); }
+.ribbon-card-body-periwinkle { background-color: var(--tint-periwinkle); }
+.ribbon-card-body-olive { background-color: var(--tint-olive); color: #ffffff; }
+
+/* NEW! Burst Sticker */
+.new-burst-sticker {
+  background-color: var(--color-yellow-sticker);
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 900;
+  padding: 3px 8px;
+  border: 1px solid var(--color-frame-ink);
+  display: inline-block;
+  transform: rotate(-8deg);
+  box-shadow: 1px 1px 0 var(--color-frame-ink);
+  animation: stickerWobble 4s ease-in-out infinite;
+}
+
+@keyframes stickerWobble {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(-5deg) scale(1.04); }
+}
+
+/* Circular Award Seal (PC Magazine Style) */
+.cert-seal {
+  width: 68px;
+  height: 68px;
+  border-radius: 9999px !important; /* Only award seals get round corners! */
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px var(--color-frame-ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  padding: 4px;
+}
+
+.cert-seal strong {
+  font-size: 10px;
+  color: #ffff00;
+}
+
+/* Retro Form Controls */
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  color: var(--color-ink);
+  letter-spacing: 0.5px;
 }
 
 .form-help {
   font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 6px;
+  font-family: var(--font-body);
+  margin-top: 3px;
+  color: #222222;
 }
 
+input[type="text"],
+input[type="number"],
+input[type="file"],
+select {
+  width: 100%;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 6px 8px;
+  border-top: 2px solid var(--bevel-dark);
+  border-left: 2px solid var(--bevel-dark);
+  border-right: 2px solid var(--bevel-light);
+  border-bottom: 2px solid var(--bevel-light);
+  outline: none;
+}
+
+input[type="text"]:focus,
+select:focus {
+  border-top: 2px solid #000000;
+  border-left: 2px solid #000000;
+  border-right: 2px solid #000000;
+  border-bottom: 2px solid #000000;
+  background-color: #ffffe0; /* Classic warm yellow focus highlight */
+}
+
+/* Checkbox */
 .checkbox-label {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--font-body);
   font-size: 13px;
-  color: var(--text-muted);
   cursor: pointer;
-  user-select: none;
 }
 
-/* Buttons */
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* 1996 Beveled Buttons (Tactile Win95 Style with Physics) */
 .btn {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
+  gap: 6px;
+  text-decoration: none;
+  background-color: var(--bevel-mid);
+  color: #000000;
+  border-top: 2px solid var(--bevel-light);
+  border-left: 2px solid var(--bevel-light);
+  border-right: 2px solid var(--bevel-black);
+  border-bottom: 2px solid var(--bevel-black);
+  transition: transform var(--trans-fast), background-color var(--trans-fast);
+  user-select: none;
 }
 
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.btn:hover {
+  background-color: #e8e8e8;
+}
+
+.btn:active {
+  border-top: 2px solid var(--bevel-black);
+  border-left: 2px solid var(--bevel-black);
+  border-right: 2px solid var(--bevel-light);
+  border-bottom: 2px solid var(--bevel-light);
+  transform: translate(1px, 1px);
 }
 
 .btn-primary {
-  background-color: var(--accent-blue);
-  color: white;
+  background-color: var(--color-frame-ink);
+  color: #ffffff;
+  border: 1px solid var(--color-frame-ink);
+  box-shadow: 2px 2px 0 var(--bevel-dark);
 }
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--accent-blue-hover);
+
+.btn-primary:hover {
+  background-color: #222222;
+  color: #ffff00;
+}
+
+.btn-primary:active {
+  box-shadow: 1px 1px 0 var(--bevel-dark);
+  transform: translate(1px, 1px);
 }
 
 .btn-success {
-  background-color: var(--accent-green);
-  color: white;
+  background-color: #1e7e34;
+  color: #ffffff;
+  border-top: 2px solid #5cd677;
+  border-left: 2px solid #5cd677;
+  border-right: 2px solid #000000;
+  border-bottom: 2px solid #000000;
 }
-.btn-success:hover:not(:disabled) {
-  background-color: var(--accent-green-hover);
+
+.btn-success:hover {
+  background-color: #155724;
 }
 
 .btn-danger {
-  background-color: var(--accent-red);
-  color: white;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-top: 2px solid #ff7a85;
+  border-left: 2px solid #ff7a85;
+  border-right: 2px solid #000000;
+  border-bottom: 2px solid #000000;
 }
-.btn-danger:hover:not(:disabled) {
-  background-color: var(--accent-red-hover);
+
+.btn-danger:hover {
+  background-color: #bd1420;
 }
 
 .btn-secondary {
-  background-color: #374151;
-  color: var(--text-main);
-}
-.btn-secondary:hover:not(:disabled) {
-  background-color: #4b5563;
+  background-color: var(--bevel-mid);
+  color: #000000;
 }
 
 .btn-sm {
-  padding: 6px 12px;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+/* Badges & Status Indicators */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--color-frame-ink);
+  text-transform: uppercase;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.badge-live {
+  background-color: #28a745;
+  color: #ffffff;
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0 #000000;
+}
+
+.badge-idle {
+  background-color: #e0e0e0;
+  color: #444444;
+}
+
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  background-color: currentColor;
+  display: inline-block;
+}
+
+.badge-dot.pulse {
+  animation: retroBlink 1s steps(2, start) infinite;
+}
+
+@keyframes retroBlink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Upload Progress Container */
+.upload-dropzone {
+  background-color: #ffffff;
+  border: 2px dashed var(--color-frame-ink);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--trans-fast);
+}
+
+.upload-dropzone.dragover {
+  background-color: #ffffe0;
+  border-style: solid;
+}
+
+.retro-progress-box {
+  background-color: #ffffff;
+  border-top: 2px solid var(--bevel-dark);
+  border-left: 2px solid var(--bevel-dark);
+  border-right: 2px solid var(--bevel-light);
+  border-bottom: 2px solid var(--bevel-light);
+  height: 20px;
+  padding: 2px;
+  margin-top: 8px;
+}
+
+.retro-progress-bar {
+  background-color: #000080; /* Windows 95 Navy Blue Progress Blocks */
+  height: 100%;
+  width: 0%;
+  transition: width 200ms linear;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #000080,
+    #000080 12px,
+    #ffffff 12px,
+    #ffffff 14px
+  );
+}
+
+/* Vintage CRT Video Player Arena (Dedicated /watch View) */
+.crt-monitor-frame {
+  background-color: #d1ccb9; /* Classic 1996 beige computer chassis */
+  border: 4px solid #8e8875;
+  border-top: 4px solid #f0ecdb;
+  border-left: 4px solid #f0ecdb;
+  padding: 16px;
+  box-shadow: 4px 4px 0 var(--color-frame-ink);
+  margin-bottom: 16px;
+}
+
+.crt-bezel {
+  background-color: var(--crt-bezel);
+  border: 6px solid #1a1a1a;
+  padding: 8px;
+  position: relative;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: var(--crt-screen);
+  overflow: hidden;
+  border: 2px solid #000000;
+}
+
+/* Optional CRT scanline overlay */
+.video-wrapper::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Unmute Button (Sticker Tab on top of video) */
+.unmute-btn {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background-color: var(--color-yellow-sticker);
+  color: var(--color-ink);
+  font-family: var(--font-heading);
   font-size: 12px;
+  font-weight: 900;
+  padding: 6px 12px;
+  border: 2px solid var(--color-frame-ink);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  box-shadow: 2px 2px 0 var(--color-frame-ink);
 }
 
-/* Endpoint List */
-.endpoint-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  margin-top: 14px;
+.unmute-btn:active {
+  transform: translate(1px, 1px);
 }
 
-.endpoint-card {
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
-  padding: 12px;
+/* Offline Overlay */
+.player-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  z-index: 5;
 }
 
-.endpoint-title {
+.overlay-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: #ff3333;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.overlay-subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #cccccc;
+  max-width: 480px;
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+
+/* Stream Info Bar underneath Monitor */
+.crt-bottom-chassis {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #b8b29f;
+  border: 1px solid #7c7766;
+}
+
+.chassis-brand {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #4a4639;
+}
+
+.chassis-led {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.chassis-led-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #00ff00;
+  box-shadow: 0 0 6px #00ff00;
+}
+
+/* Gallery of All Streams (Sky Tint Ribbon Cards) */
+.streams-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.stream-card-1996 {
+  background-color: #ffffff;
+  border: 1px solid var(--color-frame-ink);
+  box-shadow: 2px 2px 0 var(--color-frame-ink);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--trans-fast);
+}
+
+.stream-card-1996:hover {
+  transform: translateY(-2px);
+}
+
+.stream-card-1996.active-playing {
+  border: 2px solid var(--color-primary);
+  box-shadow: 3px 3px 0 var(--color-primary);
+}
+
+.stream-card-header {
+  background-color: var(--tint-sky);
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-frame-ink);
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.stream-card-body {
+  padding: 12px;
+  font-family: var(--font-body);
+  flex: 1;
+}
+
+.stream-card-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.stream-card-actions {
+  background-color: #f4f4f4;
+  border-top: 1px solid var(--color-frame-ink);
+  padding: 8px 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Modal Dialog (1996 Windows 3.1 / 95 Alert Chrome) */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-dialog {
+  background-color: var(--bevel-mid);
+  border-top: 2px solid var(--bevel-light);
+  border-left: 2px solid var(--bevel-light);
+  border-right: 2px solid var(--bevel-black);
+  border-bottom: 2px solid var(--bevel-black);
+  box-shadow: 4px 4px 0 #000000;
+  width: 90%;
+  max-width: 420px;
+}
+
+.modal-title-bar {
+  background: linear-gradient(90deg, #000080, #1084d0); /* Win95 active blue title bar */
+  color: #ffffff;
+  padding: 4px 8px;
+  font-family: var(--font-heading);
   font-size: 12px;
-  color: var(--text-muted);
+  font-weight: 700;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.endpoint-val {
-  font-family: monospace;
-  font-size: 13px;
-  color: #60a5fa;
-  word-break: break-all;
-}
-
-.status-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.status-ok {
-  color: var(--accent-green);
-}
-
-.status-err {
-  color: var(--accent-red);
-}
-
-.status-warn {
-  color: var(--accent-amber);
-}
-
-/* Alert Box */
-.alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-top: 12px;
-  display: none;
-}
-
-.alert-danger {
-  background-color: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-}
-
-.alert-success {
-  background-color: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #86efac;
-}
-
-/* Upload Dropzone */
-.dropzone {
-  border: 2px dashed var(--card-border);
-  border-radius: 10px;
-  padding: 30px;
-  text-align: center;
-  background-color: rgba(17, 24, 39, 0.5);
+.modal-close-btn {
+  background-color: var(--bevel-mid);
+  color: #000000;
+  border-top: 1px solid var(--bevel-light);
+  border-left: 1px solid var(--bevel-light);
+  border-right: 1px solid var(--bevel-black);
+  border-bottom: 1px solid var(--bevel-black);
+  font-weight: 900;
+  font-size: 10px;
+  padding: 1px 5px;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.dropzone:hover, .dropzone.dragover {
-  border-color: var(--accent-blue);
-  background-color: rgba(59, 130, 246, 0.05);
+.modal-content-body {
+  padding: 16px;
+  text-align: center;
 }
 
-.dropzone input[type="file"] {
-  display: none;
+.modal-qr-img {
+  width: 200px;
+  height: 200px;
+  margin: 12px auto;
+  border: 2px solid var(--color-frame-ink);
+  background: white;
+  padding: 6px;
 }
 
-/* Toasts */
-#toast-container {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
+/* 1996 Footer Band */
+.footer-band {
+  background-color: var(--color-canvas);
+  border-top: 1px solid var(--color-frame-ink);
+  margin-top: 32px;
+  padding: 20px 16px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 12px;
+}
+
+.footer-icon-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.footer-icon-nav::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background-color: #28a745; /* The classic green horizontal rule linking Dell footer icons */
+  z-index: 1;
+}
+
+.footer-nav-item {
+  background-color: #ffffff;
+  padding: 4px 12px;
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.footer-nav-item:hover span {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.footer-nav-icon {
+  font-size: 18px;
+}
+
+.footer-legal {
+  color: #333333;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.footer-legal a {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.footer-badges-row {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.retro-tech-pill {
+  border: 1px solid var(--color-frame-ink);
+  padding: 2px 6px;
+  font-family: var(--font-heading);
+  font-size: 10px;
+  font-weight: bold;
+  background-color: #f0f0f0;
+}
+
+/* Toast Notification (Windows 95 Tooltip Style) */
+#toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
   z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .toast {
-  background-color: #1f2937;
-  color: #f9fafb;
-  border: 1px solid #374151;
-  padding: 12px 18px;
-  border-radius: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  font-size: 14px;
+  background-color: #ffffe1; /* Classic yellow Windows tooltip */
+  color: #000000;
+  border: 1px solid #000000;
+  padding: 8px 14px;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 #000000;
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 250px;
-  animation: slideIn 0.3s ease-out;
+  gap: 8px;
+  animation: toastSlideIn 200ms var(--ease-out);
 }
 
-.toast-success { border-left: 4px solid var(--accent-green); }
-.toast-error { border-left: 4px solid var(--accent-red); }
-.toast-info { border-left: 4px solid var(--accent-blue); }
+.toast-success {
+  border-left: 6px solid #28a745;
+}
 
-@keyframes slideIn {
+.toast-error {
+  border-left: 6px solid var(--color-primary);
+  background-color: #ffe6e6;
+}
+
+.toast-info {
+  border-left: 6px solid #000080;
+}
+
+@keyframes toastSlideIn {
   from {
-    transform: translateX(100%);
     opacity: 0;
+    transform: translateY(10px);
   }
   to {
-    transform: translateX(0);
     opacity: 1;
+    transform: translateY(0);
   }
 }
